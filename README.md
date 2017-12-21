@@ -34,4 +34,3 @@ git branch -d meinfeature
 Aktualisierten master auf den Server pushen:
 git push https://github.com/s1klfrei/bprojekt.git
 
-Fertig
