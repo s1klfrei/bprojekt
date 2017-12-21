@@ -14,7 +14,7 @@ Geänderte und neue Dateien stagen:
 git add .
 
 Änderungen committen:
-git commit -m „Changes xyz“
+git commit -m „[commit nachricht(was wurde geändert)]“
 
 Jetzt den Branch auf den Server laden, wenn gewünscht:
 git push -u origin meinfeature
@@ -32,6 +32,6 @@ Nicht mehr benötigten Branch löschen:
 git branch -d meinfeature
 
 Aktualisierten master auf den Server pushen:
-git push
+git push https://github.com/s1klfrei/bprojekt.git
 
 Fertig
