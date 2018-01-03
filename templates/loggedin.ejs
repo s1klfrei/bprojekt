@@ -32,16 +32,32 @@
               <h3 class="masthead-brand">Business Intelligence App</h3>
               <nav>
                 <ul class="nav masthead-nav">
-                  <li class="active"><a href="#">Home</a></li>
-                  <li><a href="/login">Login</a></li>
+				
+				<!-- hier keine Form verwenden! rausfinden wie man button mit action 'logout' benutzen kann! -->
+                  <form class="form-logout" action="/logout" method="post"  >
+					<button id="btnLogOut" class="btn btn-lg btn-primary btn-block" type="submit">Log Out</button>
+				  </form>
+				  
                 </ul>
               </nav>
             </div>
           </div>
 
+          <div class="inner cover">
+            <h1 class="cover-heading">Successfully Logged In</h1>
+            <p class="lead">Database verification Success.</p>
+			<ul>
+				<li>
+				<%= ergebnis %>
+				</li>
+			</ul>
+          </div>
+		  
+		  
+
           <div class="mastfoot">
             <div class="inner">
-              <p>Bachelorprojekt Bauernfeind, Freiberger, Huber</a>.</p>
+              <p>Bachelorprojekt Bauernfeind, Freiberger, Huber</p>
             </div>
           </div>
 

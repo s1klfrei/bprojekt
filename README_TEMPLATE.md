@@ -20,7 +20,19 @@ do the following
 1. Open cmd prompt and type mysql user:root  pass: root
 2. Create database mydb;
 3. Use mydb;
-4. create table mytable1 (email VARCHAR(20), pass VARCHAR(20));
+4. create table users (username VARCHAR(20), pass VARCHAR(20), host VARCHAR(20), user VARCHAR(20), password VARCHAR(20), db VARCHAR(20));
+5. customer in die tabelle einfügen.
+INSERT INTO `login`.`users`
+(`username`,
+`pass`,
+`host`,
+`user`,
+`password`,
+`db`)
+VALUES
+("c3","1234", "localhost", "root", "root", "customer3");
+
+
 keep it running and now open the nodejs project in another cmd prompt and do 
 
 node app.js

@@ -9,7 +9,7 @@
     <meta name="author" content="">
     <link rel="icon" href="../../favicon.ico">
 
-    <title>Node.js Bucket List App</title>
+    <title>Business Intelligence App</title>
 
     <!-- Bootstrap core CSS -->
     <link href="../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -29,11 +29,15 @@
 
           <div class="masthead clearfix">
             <div class="inner">
-              <h3 class="masthead-brand">Project Node Task App</h3>
+              <h3 class="masthead-brand">Business Intelligence App</h3>
               <nav>
                 <ul class="nav masthead-nav">
-                  <li class="active"><a href="/">Log Out</a></li>
-
+				
+				<!-- hier keine Form verwenden! rausfinden wie man button mit action 'logout' benutzen kann! -->
+                  <form class="form-logout" action="/logout" method="post"  >
+					<button id="btnLogOut" class="btn btn-lg btn-primary btn-block" type="submit">Log Out</button>
+				  </form>
+				  
                 </ul>
               </nav>
             </div>
@@ -42,14 +46,14 @@
           <div class="inner cover">
             <h1 class="cover-heading">Successfully Logged In</h1>
             <p class="lead">Database verification Success.</p>
-            <p class="lead">
-              <a href="/" class="btn btn-lg btn-default">Log Out</a>
-            </p>
+			
           </div>
+		  
+		  
 
           <div class="mastfoot">
             <div class="inner">
-              <p>Node Task App, by <a href="https://twitter.com/jay3dec">@jay3dec</a>.</p>
+              <p>Bachelorprojekt Bauernfeind, Freiberger, Huber</p>
             </div>
           </div>
 
