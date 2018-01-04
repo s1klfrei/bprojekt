@@ -1,72 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="icon" href="../../favicon.ico">
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<link rel="icon" href="../../favicon.ico">
 
-    <title>Business Intelligence App</title>
+	<title>Business Intelligence App</title>
 
-    <!-- Bootstrap core CSS -->
-    <link href="../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+	<!-- Bootstrap core CSS -->
+	<link href="../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Custom styles for this template -->
-    <link href="../style/cover.css" rel="stylesheet">
+	<!-- Custom styles for this template -->
+	<link href="../style/cover.css" rel="stylesheet">
+	<script src="http://d3js.org/d3.v4.min.js"></script>
 
   </head>
-
+  
+	
   <body>
+	
+	<div class="site-wrapper">
 
-    <div class="site-wrapper">
+	  <div class="site-wrapper-inner">
 
-      <div class="site-wrapper-inner">
+		<div class="cover-container">
 
-        <div class="cover-container">
-
-          <div class="masthead clearfix">
-            <div class="inner">
-              <h3 class="masthead-brand">Business Intelligence App</h3>
-              <nav>
-                <ul class="nav masthead-nav">
+		  <div class="masthead clearfix">
+			<div class="inner">
+			  <h3 class="masthead-brand">Business Intelligence App</h3>
+			  <nav>
+				<ul class="nav masthead-nav">
 				
 				<!-- hier keine Form verwenden! rausfinden wie man button mit action 'logout' benutzen kann! -->
-                  <form class="form-logout" action="/logout" method="post"  >
+				  <form class="form-logout" action="/logout" method="post"  >
 					<button id="btnLogOut" class="btn btn-lg btn-primary btn-block" type="submit">Log Out</button>
 				  </form>
 				  
-                </ul>
-              </nav>
-            </div>
-          </div>
+				</ul>
+			  </nav>
+			</div>
+		  </div>
 
-          <div class="inner cover">
-            <h1 class="cover-heading">Successfully Logged In</h1>
-            <p class="lead">Database verification Success.</p>
-			<ul>
-				<li>
-				<%= ergebnis %>
-				</li>
-			</ul>
-          </div>
+		  <div class="inner cover">
+			<h1 class="cover-heading">Successfully Logged In</h1>
+			
+		  </div>
+		  <div class="kpis">
+			  <ul id="diagramme"> </ul>
+				
+				<script>
+					var data = <%-JSON.stringify(result1)%>
+						var canvas = d3.select("#diagramme")
+							.append("svg")
+							.attr("width", 500)
+							.attr("height", 200),
+							margin = {top: 20, right: 20, bottom: 20, left: 20},
+							width = +canvas.attr("width") - margin.left - margin.right,
+							height = +canvas.attr("height") - margin.top - margin.bottom;
+
+						var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+							y = d3.scaleLinear().rangeRound([height, 0]);
+
+						var g = canvas.append("g")
+							.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+							x.domain(data.map(function(d) { return d.name; }));
+							y.domain([0, d3.max(data, function(d) { return d.age; })]);
+
+						g.append("g")
+							.attr("class", "axis axis--x")
+							.attr("transform", "translate(0," + height + ")")
+							.call(d3.axisBottom(x));
+
+						g.append("g")
+							.attr("class", "axis axis--y")
+							.call(d3.axisLeft(y))
+							.append("text")
+							.attr("transform", "rotate(-90)")
+							.attr("y", 6)
+							.attr("dy", "0.71em")
+							.attr("text-anchor", "end")
+							.text("Frequency");
+
+						g.selectAll(".bar")
+							.data(data)
+							.enter().append("rect")
+							.attr("class", "bar")
+							.attr("x", function(d) { return x(d.name); })
+							.attr("y", function(d) { return y(d.age); })
+							.attr("width", x.bandwidth())
+							.attr("height", function(d) { return height - y(d.age); });
+				</script>
+				
+		  </div>
 		  
-		  
 
-          <div class="mastfoot">
-            <div class="inner">
-              <p>Bachelorprojekt Bauernfeind, Freiberger, Huber</p>
-            </div>
-          </div>
+		  <div class="mastfoot">
+			<div class="inner">
+			  <p>Bachelorprojekt Bauernfeind, Freiberger, Huber</p>
+			</div>
+		  </div>
 
-        </div>
+		</div>
 
-      </div>
+	  </div>
 
-    </div>
+	</div>
 
-    
+	
   </body>
 </html>

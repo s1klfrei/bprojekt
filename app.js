@@ -1,12 +1,17 @@
+//ursprünglicher code von https://github.com/bishnucit/Nodejs_and_mysql
+
 var express = require('express');
 var app = express();
 var mysql = require('mysql');
 var path = require('path');
 
+
+var deasync = require('deasync');
+
 var sessions = require('express-session');
 
-var session;
 
+var session;
 
 var connection = mysql.createConnection({
 
@@ -17,25 +22,14 @@ var connection = mysql.createConnection({
 });
 var bodyParser = require('body-parser');
 
-
+//für ejs nutzung
 app.set('views', path.join(__dirname, 'templates'));
 app.set('view engine', 'ejs');
-
 
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 	
-
-
-connection.query('SELECT * from users', function(err, rows, fields) {
-  if (!err){
-    //console.log('The solution is: ', rows);
-	}
-  else
-    console.log('Error while performing Query.');
-});
-
 
 // Binding express app to port 3000
 app.listen(3000,function(){
@@ -46,7 +40,6 @@ app.listen(3000,function(){
 app.use('/node_modules',  express.static(__dirname + '/node_modules'));
 
 app.use('/style',  express.static(__dirname + '/style'));
-
 
 //session encryption
 app.use(sessions({
@@ -59,7 +52,6 @@ app.get('/',function(req,res){
     res.sendFile('home.html',{'root': __dirname + '/templates'});
 });
 
-
 app.get('/login',function(req,res){
     res.sendFile('signin.html',{'root': __dirname + '/templates'});
 });
@@ -67,23 +59,16 @@ app.get('/loginRetry',function(req,res){
     res.sendFile('signinretry.html',{'root': __dirname + '/templates'});
 });
 
-
 app.get('/loggedin',function(req,res){
 	session = req.session;//session auf aktuelle session des anfragenden setzen
-	if(session.uniqueID){ //wirklich eingeloggt.
+	if(session.uniqueID){ //test ob wirklich eingeloggt.
+	
 		//verbindung mit kundendb herstellen
-		//console.log(session.uniqueID);
+		
 		var selectString = 'SELECT * FROM users WHERE username="'+session.uniqueID+'" ';
 		var cusCon;
 		connection.query(selectString, function(err, results) {
-		/*	
-		console.log(results);
-		var string=JSON.stringify(results);
-		console.log(string);
-		
-		console.log(results[0].host);
-		*/	
-		
+					
 			cusCon = mysql.createConnection({
 
 			  host     : results[0].host,
@@ -92,20 +77,40 @@ app.get('/loggedin',function(req,res){
 			  database : results[0].db
 			});
 			cusCon.connect();
-		
-			//testquery
-			cusCon.query('SELECT description FROM item WHERE id = 1', function(err, rows, fields) {
+			
+			var res1;
+			var res2;
+			
+			//testquery			
+			cusCon.query('SELECT description AS name, id AS age FROM item where id<10', function(err, results) {
 			  if (!err){
-				console.log('The solution is: ', rows[0].description);
-				
-				res.render('loggedin', {ergebnis: rows[0].description});
+				res1=results;
 			  }
-			  else
+			  else{
 				console.log('Error while performing Query.', err);
+			  }
 			});
+			
+			cusCon.query('SELECT gb AS date, wert AS close FROM visitor', function(err, results) {
+			  if (!err){
+				res2=results;
+			  }
+			  else{
+				console.log('Error while performing Query.', err);
+			  }
+			});
+			
+			
+			//"date": "24-Apr-07",
+			//"close": 93.24
+			
+			while(res1===undefined||res2===undefined){
+				deasync.runLoopOnce();
+			}
+			res.render('loggedin', {result1: res1, result2: res2});
+
 		});
 		
-		//res.sendFile('loggedin.html',{'root': __dirname + '/templates'});
 	}
 	else{
 		res.sendFile('notloggedin.html',{'root': __dirname + '/templates'});
@@ -114,10 +119,9 @@ app.get('/loggedin',function(req,res){
 
 
 
-//signin.html zeile 45
+
 app.post('/verifyuser', function(req,res){
-	//console.log('checking user in database');
-	//console.log(req.body.pass);
+
 	var selectString = 'SELECT COUNT(username) FROM users WHERE username="'+req.body.username+'" AND pass="'+req.body.pass+'" ';
 	 
 	connection.query(selectString, function(err, results) {

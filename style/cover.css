@@ -161,3 +161,15 @@ body {
     width: 700px;
   }
 }
+
+.bar {
+  fill: steelblue;
+}
+
+.bar:hover {
+  fill: brown;
+}
+
+.axis--x path {
+  display: none;
+}
