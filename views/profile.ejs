@@ -1,0 +1,166 @@
+<head>
+  <script src="http://d3js.org/d3.v4.min.js"></script>
+  <script src="http://dimplejs.org/dist/dimple.v2.3.0.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="../style/styles.css">
+  <title>BI-App</title>
+</head>
+<!-- <style>
+div.kpi_div {
+	position: relative;
+	float:left;
+	border: 4px solid black;
+}
+
+button.kpi_button_mitte {
+	position: absolute;
+	right: 325;
+	bottom: 170;
+	width: 80px;
+}
+
+button.kpi_button_obenrechts {
+	position: absolute;
+	right: 8;
+	bottom: 370;
+	width: 80px;
+}
+
+</style> -->
+<body>
+	<h1> Business Intelligence App </h1>
+	<div id = "div_kpi4" class="kpi_div">
+		<button id="button_kpi4" class="kpi_button_mitte" onclick="kpi4(this.id)" >Mehr</button>
+		<svg id="svg_kpi4" width="650" height="400">
+			<text x="325" y="200" font-size="30" text-anchor="middle">Gesamtumsatz im Jahr 2017: <%=result4_1%>€</text>
+		</svg>
+	</div>
+
+	<div id = "div_kpi5" class="kpi_div">
+		<button id="button_kpi5" class="kpi_button_mitte" onclick="kpi5(this.id)" >Mehr</button>
+		<svg id="svg_kpi5" width="650" height="400"></svg>
+	</div>
+	<div id = "div_kpi6" class="kpi_div">
+		<button id="button_kpi6" class="kpi_button_mitte" onclick="kpi6(this.id)" >Mehr</button>
+		<svg id="svg_kpi6" width="650" height="400"></svg>
+	</div>
+	<script type="text/javascript">
+		/*
+		//säulen
+		var svg = dimple.newSvg("body", 650, 400);
+		var data =
+		var chart = new dimple.chart(svg, data);
+		var xaxis = chart.addCategoryAxis("x", "name");
+		//xaxis.hidden = true;
+		chart.addMeasureAxis("y", "age");
+		chart.addSeries(null, dimple.plot.bar);
+		chart.draw();
+
+		//ring
+		var svg1 = dimple.newSvg("body", 700, 400);
+		var data1 =
+		var chart1 = new dimple.chart(svg1, data1);
+		chart1.setBounds(20, 20, 460, 360);
+		chart1.addMeasureAxis("p", "population");
+		var ring = chart1.addSeries("age", dimple.plot.pie);
+		ring.innerRadius = "50%";
+		chart1.addLegend(450, 20, 90, 300, "left");
+		chart1.draw();
+
+		//linien
+		var svg2 = dimple.newSvg("body", 650, 400);
+		var data2 =
+		//data2 = dimple.filterData(data2, "Owner", ["Aperture", "Black Mesa"])
+		var chart2 = new dimple.chart(svg2, data2);
+		chart2.setBounds(60, 30, 505, 305);
+		var x = chart2.addTimeAxis("x", "date", "%Y-%m-%dT%H:%M:%S.000Z", "%d-%m-%Y %H:%M");
+		chart2.addMeasureAxis("y", "close");
+		var s = chart2.addSeries(null, dimple.plot.line);
+		chart2.draw();*/
+
+
+
+		//vorher form wo jahr ausgewählt werden kann
+		//umsatz pro monat
+		function kpi4 (button_id){
+			var el = document.getElementById(button_id);
+			if(el.firstChild.data == "Mehr"){
+				//var svg4 = dimple.newSvg("#div_kpi4", 650, 400);
+				var svg4 = d3.select("#svg_kpi4");
+				svg4.selectAll("*").remove();
+				svg4.append("text")
+						.attr("x", "0")
+						.attr("y", "20")
+						.text("Monatlicher Umsatz des Jahres ...");
+				var data4 = <%-JSON.stringify(result4_2)%>
+				var chart4 = new dimple.chart(svg4, data4);
+				var x4 = chart4.addCategoryAxis("x", "monat");
+				x4.title = "Monat";
+
+				var y4 = chart4.addMeasureAxis("y", "umsatz");
+				y4.title = "Umsatz (€)";
+				chart4.addSeries(null, dimple.plot.bar);
+				chart4.draw();
+				el.firstChild.data = "Weniger";
+				el.classList.remove('kpi_button_mitte');
+				el.classList.add('kpi_button_obenrechts');
+			} else {
+				el.firstChild.data = "Mehr";
+				d3.select("#svg_kpi4").selectAll("*").remove();
+				d3.select("#svg_kpi4")
+					.append("text")
+						.attr("x", "100")
+						.attr("y", "200")
+						.attr("font-size", "30")
+						.text("Gesamtumsatz im Jahr 2017: "+<%=result4_1%>+"€");
+				el.classList.remove('kpi_button_obenrechts');
+				el.classList.add('kpi_button_mitte');
+			}
+		}
+
+
+		//vorher form wo jahr ausgewählt werden kann
+		//durchschnittliche bestellsumme pro monat
+		function kpi5(button_id){
+			var el = document.getElementById(button_id);
+			if(el.firstChild.data == "Mehr"){
+				var svg5 = d3.select("#svg_kpi5");
+				var data5 = <%-JSON.stringify(result5)%>
+				var chart5 = new dimple.chart(svg5, data5);
+				var x5 = chart5.addCategoryAxis("x", "monat");
+				x5.title = "Monat";
+				var y5 = chart5.addMeasureAxis("y", "avg_bestellsumme");
+				y5.title = "Durchschnittliche Bestellsumme (€)";
+				chart5.addSeries(null, dimple.plot.bar);
+				chart5.draw();
+				el.firstChild.data = "Weniger";
+			}else{
+				el.firstChild.data = "Mehr";
+				d3.select("#svg_kpi5").selectAll("*").remove();
+
+			}
+		}
+
+		function kpi6(button_id){
+			var el = document.getElementById(button_id);
+			if(el.firstChild.data == "Mehr"){
+				//var svg5 = dimple.newSvg("body", 650, 400);
+				//svg5.attr("id", "svg5");
+				var svg6 = d3.select("#svg_kpi6");
+				var data6 = <%-JSON.stringify(result5)%>
+				var chart6 = new dimple.chart(svg6, data6);
+				var x6 = chart6.addCategoryAxis("x", "monat");
+				x6.title = "Monat";
+				var y6 = chart6.addMeasureAxis("y", "avg_bestellsumme");
+				y6.title = "Durchschnittliche Bestellsumme (€)";
+				chart6.addSeries(null, dimple.plot.bar);
+				chart6.draw();
+				el.firstChild.data = "Weniger";
+			}else{
+				el.firstChild.data = "Mehr";
+				d3.select("#svg_kpi6").selectAll("*").remove();
+				//d3.select("#svg5").remove();
+			}
+		}
+
+	</script>
+</body>
