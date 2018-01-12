@@ -68,10 +68,10 @@ module.exports = function(app, passport, connectionLoginDB) {
 
     		connectionCustomerDB.connect();
 
-            console.log(req.user.username + "hat die Verbindung zu seiner verknüpften Datenbank hergestellt.");
+            console.log("'" + req.user.username + "'" + " hat die Verbindung zu seiner verknüpften Datenbank hergestellt.");
 
             // Setup der verschiedenen KPI-Ergebnisse
-    		var res1;
+    	//	var res1;
     		var res2;
     		var res3;
     		var res4_1;
@@ -79,7 +79,7 @@ module.exports = function(app, passport, connectionLoginDB) {
     		var res5;
     		var res6;
 
-    		/*
+            /*
     		//testquery	1
     		connectionCustomerDB.query('SELECT description AS name, id AS age FROM item where id<10', function(err, results) {
     		  if (!err){
@@ -89,6 +89,7 @@ module.exports = function(app, passport, connectionLoginDB) {
     			console.log('Error while performing Query.', err);
     		  }
     		});
+            */
 
     		//testquery	2
     		connectionCustomerDB.query('SELECT session_date AS date, item_total_order_qty	AS close FROM visitor WHERE id<6606788 ORDER BY session_date ASC ', function(err, results) {
@@ -111,7 +112,7 @@ module.exports = function(app, passport, connectionLoginDB) {
     		  }
     		});
 
-            */
+
 
             //Umsatz pro Jahr --> Jahr einlesen!!
     		connectionCustomerDB.query('SELECT SUM(item_total_order_value) AS umsatz'+
@@ -155,12 +156,15 @@ module.exports = function(app, passport, connectionLoginDB) {
     		});
 
             // Auf KPI-Query-Ergebnisse warten
-    		while (res4_1 === undefined || res4_2 === undefined || res5 === undefined) {
+    		while (res2 === undefined || res3 === undefined || res4_1 === undefined || res4_2 === undefined || res5 === undefined) {
     			deasync.runLoopOnce();
     		}
 
     		res.render('profile.ejs', {
+
                 user        : req.user.username,
+                result2     : res2,
+                result3     : res3,
                 result4_1   : res4_1,
                 result4_2   : res4_2,
                 result5     : res5
