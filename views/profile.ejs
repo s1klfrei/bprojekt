@@ -1,153 +1,167 @@
 <!doctype html>
-<html>
+<html lang="de">
 <head>
-  <script src="http://d3js.org/d3.v4.min.js"></script>
-  <script src="http://dimplejs.org/dist/dimple.v2.3.0.min.js"></script>
-  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
-  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
-  <link rel="stylesheet" type="text/css" href="../style/styles.css">
-  <title>BI App DC - Benutzer: <%= user %></title>
-  <style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="http://d3js.org/d3.v4.min.js"></script>
+    <script src="http://dimplejs.org/dist/dimple.v2.3.0.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+    <title>BI App DC - <%= user %></title>
+    <style>
+        /* Remove the navbar's default margin-bottom and rounded borders */
+        .navbar {
+          margin-bottom: 0;
+          border-radius: 0;
+        }
 
-      body        { padding-top:80px; word-wrap:break-word; }
+        /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+        .row.content {height: 450px}
 
-      div.kpi_div {
-      	position: relative;
-      	float:left;
-      	border: 4px solid black;
-      }
+        /* Set gray background color and 100% height */
+        .sidenav {
+          padding-top: 20px;
+          background-color: #f1f1f1;
+          height: 100%;
+        }
 
-      button.kpi_button_mitte {
-      	position: absolute;
-      	right: 325;
-      	bottom: 170;
-      	width: 80px;
-      }
+        /* Set black background color, white text and some padding */
+        footer {
+          background-color: #555;
+          color: white;
+          padding: 15px;
+        }
 
-      button.kpi_button_obenrechts {
-      	position: absolute;
-      	right: 8;
-      	bottom: 370;
-      	width: 80px;
-      }
+        /* On small screens, set height to 'auto' for sidenav and grid */
+        @media screen and (max-width: 767px) {
+          .sidenav {
+            height: auto;
+            padding: 15px;
+          }
+          .row.content {height:auto;}
+        }
+    </style>
+    <script type="text/javascript">
 
-  </style>
+        $("#button_kpi1").change(function() {
+            console.log("-.-.-.-.-.-Button wurde geaendert: " + $(this).val());
+            $.get("?year=" + $(this).val(), function(data, status) {
+
+          })
+        });
+
+        // // TO-DO responsive resizing
+        // window.onresize = function () {
+        // // As of 1.1.0 the second parameter here allows you to draw
+        // // without reprocessing data.  This saves a lot on performance
+        // // when you know the data won't have changed.
+        //     myChart.draw(0, true);
+        // };
+
+    </script>
+
 </head>
 
+
 <body>
-    <div class="container">
 
-        <div class="page-header text-center">
-            <h1><span class="fa fa-anchor"></span> Business Intelligence App</h1>
-            <a href="/logout" class="btn btn-default btn-sm">Ausloggen</a>
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/profile">Business Intelligence App DC</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav navbar-right">
+          <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> Ausloggen</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+
+<div class="container-fluid">
+    <div class="row content">
+
+        <!-- Linke Seite (seitliche Navigationsleiste) -->
+        <div class="col-sm-3 sidenav">
+            <h2>Hallo <%= user %>!</h2>
+            <ul class="nav nav-pills nav-stacked">
+                <li class="active"><a href="#section1"><span class="glyphicon glyphicon-stats"> Dashboard</a></li>
+                <li><a href="#section2"><span class="glyphicon glyphicon-cog"> Einstellungen</a></li>
+            </ul>
         </div>
+        <br>
 
-        <div class="row">
+        <!-- Rechte Seite (Dashboard / Einstellungen) -->
+        <div class="col-sm-9" id="section1">
+            <!-- *****************
+            **********************
+            REIHE 1
+            **********************
+            ******************* -->
+            <div class="row">
+                <!-- Linkes Feld in Reihe 1 -->
+                <div class="col-lg-6">
+                    <div class="well">
+                        <p>Gesamtumsatz im Jahr
+                            <!-- Auswahl-Button für parametrisierbares Jahr von KPI1 (UmsatzProMonat) -->
+                            <select id="button_kpi1">
+                                <% console.log(years_kpi1);
+                                for(var i of years_kpi1) { %>
+                                <!-- Benutze bei i."year" den Nametag, den man in der Query der Spalte zuweist. -->
+                                <option><%=i.year%></option><%
+                                }
+                                %>
+                            </select>
+                        : <strong><%=result4_1%>€</strong>
 
-            <!-- LOCAL INFORMATION -->
-            <div class="col-sm-6">
-                <div class="well">
-                    <h3><span class="fa fa-user"></span> Herzlich Willkommen <%= user %>!</h3>
-                </div>
-                    <div id = "div_kpi4" class="kpi_div">
-                        <button id="button_kpi4" class="kpi_button_mitte" onclick="kpi4(this.id)" >Mehr</button>
-                        <svg id="svg_kpi4" width="650" height="400">
-                            <text x="325" y="200" font-size="30" text-anchor="middle">Gesamtumsatz im Jahr 2017: <%=result4_1%>€</text>
-                        </svg>
-                    </div>
+                        <!-- Button um Diagramm von KPI1 (UmsatzProMonat) ein- & auszublenden -->
+                        <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi1" data-toggle="collapse" type="button">Umsatz pro Monat vergleichen</button>
 
-                    <div id = "div_kpi5" class="kpi_div">
-                        <button id="button_kpi5" class="kpi_button_mitte" onclick="kpi5(this.id)" >Mehr</button>
-                        <svg id="svg_kpi5" width="650" height="400"></svg>
-                    </div>
-                    <div id = "div_kpi6" class="kpi_div">
-                        <button id="button_kpi6" class="kpi_button_mitte" onclick="kpi6(this.id)" >Mehr</button>
-                        <svg id="svg_kpi6" width="650" height="400"></svg>
-                    </div>
-                    <script type="text/javascript">
+                        </p>
 
-
-                        /*
-                        //säulen
-                        var svg = dimple.newSvg("body", 650, 400);
-                        var data = 
-                        var chart = new dimple.chart(svg, data);
-                        var xaxis = chart.addCategoryAxis("x", "name");
-                        //xaxis.hidden = true;
-                        chart.addMeasureAxis("y", "age");
-                        chart.addSeries(null, dimple.plot.bar);
-                        chart.draw();
-                        */
-
-                        //ring
-                        var svg1 = dimple.newSvg("body", 700, 400);
-                        var data1 = <%-JSON.stringify(result3)%>
-                        var chart1 = new dimple.chart(svg1, data1);
-                        chart1.setBounds(20, 20, 460, 360);
-                        chart1.addMeasureAxis("p", "population");
-                        var ring = chart1.addSeries("age", dimple.plot.pie);
-                        ring.innerRadius = "50%";
-                        chart1.addLegend(450, 20, 90, 300, "left");
-                        chart1.draw();
-
-                        //linien
-                        var svg2 = dimple.newSvg("body", 650, 400);
-                        var data2 = <%-JSON.stringify(result2)%>
-                        //data2 = dimple.filterData(data2, "Owner", ["Aperture", "Black Mesa"])
-                        var chart2 = new dimple.chart(svg2, data2);
-                        chart2.setBounds(60, 30, 505, 305);
-                        var x = chart2.addTimeAxis("x", "date", "%Y-%m-%dT%H:%M:%S.000Z", "%d-%m-%Y %H:%M");
-                        chart2.addMeasureAxis("y", "close");
-                        var s = chart2.addSeries(null, dimple.plot.line);
-                        chart2.draw();
-
-
-
-                        //vorher form wo jahr ausgewählt werden kann
-                        //umsatz pro monat
-                        function kpi4 (button_id){
-                            var el = document.getElementById(button_id);
-                            if(el.firstChild.data == "Mehr"){
-                                //var svg4 = dimple.newSvg("#div_kpi4", 650, 400);
-                                var svg4 = d3.select("#svg_kpi4");
-                                svg4.selectAll("*").remove();
-                                svg4.append("text")
-                                        .attr("x", "0")
-                                        .attr("y", "20")
-                                        .text("Monatlicher Umsatz des Jahres ...");
-                                var data4 = <%-JSON.stringify(result4_2)%>
+                        <!-- Diagramm KPI 1 -->
+                        <div id="chart_kpi1" class="collapse in" aria-expanded="false" style>
+                            <!--***********************
+                            Hier kommt das Diagramm für KPI 1 (Umsatz pro Monat) hin
+                            ************************-->
+                            <script type="text/javascript">
+                                //
+                                // KPI-Diagramm Umsatz pro Monat
+                                //
+                                var svg4 = dimple.newSvg("#chart_kpi1", "100%", 250);
+                                var data4 = <%-JSON.stringify(result4_2)%>;
                                 var chart4 = new dimple.chart(svg4, data4);
                                 var x4 = chart4.addCategoryAxis("x", "monat");
                                 x4.title = "Monat";
-
                                 var y4 = chart4.addMeasureAxis("y", "umsatz");
                                 y4.title = "Umsatz (€)";
                                 chart4.addSeries(null, dimple.plot.bar);
                                 chart4.draw();
-                                el.firstChild.data = "Weniger";
-                                el.classList.remove('kpi_button_mitte');
-                                el.classList.add('kpi_button_obenrechts');
-                            } else {
-                                el.firstChild.data = "Mehr";
-                                d3.select("#svg_kpi4").selectAll("*").remove();
-                                d3.select("#svg_kpi4")
-                                    .append("text")
-                                        .attr("x", "100")
-                                        .attr("y", "200")
-                                        .attr("font-size", "30")
-                                        .text("Gesamtumsatz im Jahr 2017: "+<%=result4_1%>+"€");
-                                el.classList.remove('kpi_button_obenrechts');
-                                el.classList.add('kpi_button_mitte');
-                            }
-                        }
+                            </script>
+                        </div>
 
+                    </div>
+                </div>
 
-                        //vorher form wo jahr ausgewählt werden kann
-                        //durchschnittliche bestellsumme pro monat
-                        function kpi5(button_id){
-                            var el = document.getElementById(button_id);
-                            if(el.firstChild.data == "Mehr"){
-                                var svg5 = d3.select("#svg_kpi5");
+                <!-- Rechtes Feld in Reihe 1 -->
+                <div class="col-lg-6">
+                    <div class="well">
+                        <!-- Button um Diagramm von KPI 2 ein- & auszublenden -->
+                        <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi2" data-toggle="collapse" type="button">Durchschnittliche Bestellsumme anzeigen</button>
+                        <!-- Diagramm KPI 2 -->
+                        <div id="chart_kpi2" class="collapse in" aria-expanded="false" style>
+                            <!--***********************
+                            Hier kommt das Diagramm für KPI 2 (Durchschnittliche Bestellsumme) hin
+                            ************************-->
+                            <script>
+                                //
+                                // KPI-Diagramm Durchschnittliche Bestellsumme
+                                //
+                                var svg5 = dimple.newSvg("#chart_kpi2", "100%", 250);
                                 var data5 = <%-JSON.stringify(result5)%>
                                 var chart5 = new dimple.chart(svg5, data5);
                                 var x5 = chart5.addCategoryAxis("x", "monat");
@@ -156,46 +170,112 @@
                                 y5.title = "Durchschnittliche Bestellsumme (€)";
                                 chart5.addSeries(null, dimple.plot.bar);
                                 chart5.draw();
-                                el.firstChild.data = "Weniger";
-                            }else{
-                                el.firstChild.data = "Mehr";
-                                d3.select("#svg_kpi5").selectAll("*").remove();
-
-                            }
-                        }
-
-                        function kpi6(button_id){
-                            var el = document.getElementById(button_id);
-                            if(el.firstChild.data == "Mehr"){
-                                //var svg5 = dimple.newSvg("body", 650, 400);
-                                //svg5.attr("id", "svg5");
-                                var svg6 = d3.select("#svg_kpi6");
-                                var data6 = <%-JSON.stringify(result5)%>
-                                var chart6 = new dimple.chart(svg6, data6);
-                                var x6 = chart6.addCategoryAxis("x", "monat");
-                                x6.title = "Monat";
-                                var y6 = chart6.addMeasureAxis("y", "avg_bestellsumme");
-                                y6.title = "Durchschnittliche Bestellsumme (€)";
-                                chart6.addSeries(null, dimple.plot.bar);
-                                chart6.draw();
-                                el.firstChild.data = "Weniger";
-                            }else{
-                                el.firstChild.data = "Mehr";
-                                d3.select("#svg_kpi6").selectAll("*").remove();
-                                //d3.select("#svg5").remove();
-                            }
-                        }
-
-                    </script>
-
+                            </script>
+                        </div>
+                    </div>
+                </div>
 
             </div>
 
+            <!-- *****************
+            **********************
+            REIHE 2
+            **********************
+            ******************* -->
+            <div class="row">
+                <!-- Linkes Feld in Reihe 2 -->
+                <div class="col-lg-6">
+                    <div class="well">
+                        <!-- Button um Diagramm von KPI 3 ein- & auszublenden -->
+                        <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi3" data-toggle="collapse" type="button">Conversionrate (absolut) anzeigen</button>
+                        <!-- Diagramm KPI 3 -->
+                        <div id="chart_kpi3" class="collapse in" aria-expanded="false" style>
+                            <!--***********************
+                            Hier kommt das Diagramm für KPI 3 (Conversionrate in absoluten Zahlen pro Monat) hin
+                            ************************-->
+                            <script>
+                                //
+                                // KPI-Diagramm Conversionrate in absoluten Zahlen pro Monat
+                                //
+                                var svg6 = dimple.newSvg("#chart_kpi3", "100%", 250);
+                                // so sieht die Übergabe der DB aus:
+                                //      var result = [
+                                //	     	{"monat": "1", "anzahl_orders": "123", "anzahl_visitor": "200"},
+                                //	     	{"monat": "2", "anzahl_orders": "32", "anzahl_visitor": "90"},
+                                //		    {"monat": "3", "anzahl_orders": "55", "anzahl_visitor": "102"}
+                                //      ];
+                                var res6 = <%-JSON.stringify(result6)%>
+                                var data6=[];
+
+                                for(var i = 0; i < res6.length; i++){
+                                    var obj = res6[i];
+                                    var obj1 = {"Monat": obj.monat, "Art": "Orders", "Anzahl": obj.anzahl_orders};
+                                    var obj2 = {"Monat": obj.monat, "Art": "Visitors", "Anzahl": obj.anzahl_visitor};
+                                    data6.push(obj1);
+                                    data6.push(obj2);
+                                }
+                                console.log(data6);
+                                // so sieht die Eingabe für das Diagramm aus:
+                                //	     var data6 = [
+                                //	 	    {"Monat": "1", "Art": "Orders", "Anzahl": "10"},
+                                //	     	{"Monat": "1", "Art": "Visitors", "Anzahl": "20"},
+                                //		    {"Monat": "2", "Art": "Orders", "Anzahl": "1"},
+                                //		    {"Monat": "2", "Art": "Visitors", "Anzahl": "2"}
+                                //	     ];
+
+                                var chart6 = new dimple.chart(svg6, data6);
+                                chart6.addCategoryAxis("x", ["Monat", "Art"]);
+                                chart6.addMeasureAxis("y", "Anzahl");
+                                chart6.addSeries("Art", dimple.plot.bar);
+                                chart6.addLegend("80%", 10, "10%", "95%", "right");
+                                chart6.draw();
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- Rechtes Feld in Reihe 2 -->
+                <div class="col-lg-6">
+                    <div class="well">
+                        <!-- Button um Diagramm von KPI 4 ein- & auszublenden -->
+                        <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi4" data-toggle="collapse" type="button">Umsatz über Zeit (absolut) anzeigen</button>
+                        <!-- Diagramm KPI 3 -->
+                        <div id="chart_kpi4" class="collapse in" aria-expanded="false" style>
+                            <!--***********************
+                            Hier kommt das Diagramm für KPI 4 (Umsatz über Stunde)  hin
+                            ************************-->
+                            <script>
+                                //
+                                // KPI-Diagramm Umsatz über Stunde
+                                //
+                        		var svg7 = dimple.newSvg("#chart_kpi4", "100%", 250);
+                        		var data7 = <%-JSON.stringify(result7)%>
+                        		var chart7 = new dimple.chart(svg7, data7);
+                        		var x7 = chart7.addCategoryAxis("x", "stunde");
+                        		chart7.addMeasureAxis("y", "umsatz");
+                        		chart7.addSeries(null, dimple.plot.line);
+                        		chart7.draw();
+                            </script>
+                        </div>
+
+                    </div>
+
+                </div>
+
+        <!-- <div class="col-sm-9" id="section2">
+            hier muss noch der Einstellungen-Tab bearbeitet werden
+        </div> -->
+
+
+
+            </div>
         </div>
 
     </div>
+</div>
 
 
+<footer class="container-fluid text-center" id="footer">
 
-</body>
-</html>
+</footer>
+
+ </body>

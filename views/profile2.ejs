@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="http://d3js.org/d3.v4.min.js"></script>
+    <script src="http://dimplejs.org/dist/dimple.v2.3.0.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+    <title>BI App DC - <%= user %></title>
+    <style>
+        /* Remove the navbar's default margin-bottom and rounded borders */
+        .navbar {
+          margin-bottom: 0;
+          border-radius: 0;
+        }
+
+        /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+        .row.content {height: 450px}
+
+        /* Set gray background color and 100% height */
+        .sidenav {
+          padding-top: 20px;
+          background-color: #f1f1f1;
+          height: 100%;
+        }
+
+        /* Set black background color, white text and some padding */
+        footer {
+          background-color: #555;
+          color: white;
+          padding: 15px;
+        }
+
+        /* On small screens, set height to 'auto' for sidenav and grid */
+        @media screen and (max-width: 767px) {
+          .sidenav {
+            height: auto;
+            padding: 15px;
+          }
+          .row.content {height:auto;}
+        }
+    </style>
+    <script type="text/javascript">
+
+        $("#button_kpi1").change(function() {
+            console.log("-.-.-.-.-.-Button wurde geaendert: " + $(this).val());
+            $.get("?year=" + $(this).val(), function(data, status) {
+
+          })
+        });
+
+        //
+        // KPI-Diagramm Umsatz pro Monat
+        //
+        var svg4 = dimple.newSvg("#chart_kpi1", "100%", 500);
+        var data4 = <%-JSON.stringify(result4_2)%>;
+        var chart4 = new dimple.chart(svg4, data4);
+        var x4 = chart4.addCategoryAxis("x", "monat");
+        x4.title = "Monat";
+        var y4 = chart4.addMeasureAxis("y", "umsatz");
+        y4.title = "Umsatz (€)";
+        chart4.addSeries(null, dimple.plot.bar);
+        chart4.draw();
+
+
+
+        // // TO-DO responsive resizing
+        // window.onresize = function () {
+        // // As of 1.1.0 the second parameter here allows you to draw
+        // // without reprocessing data.  This saves a lot on performance
+        // // when you know the data won't have changed.
+        //     myChart.draw(0, true);
+        // };
+
+
+
+
+        //
+        // KPI-Diagramm Durchschnittliche Bestellsumme
+        //
+        var svg5 = dimple.newSvg("#chart_kpi2", "100%", 500);
+        var data5 = <%-JSON.stringify(result5)%>
+        var chart5 = new dimple.chart(svg5, data5);
+        var x5 = chart5.addCategoryAxis("x", "monat");
+        x5.title = "Monat";
+        var y5 = chart5.addMeasureAxis("y", "avg_bestellsumme");
+        y5.title = "Durchschnittliche Bestellsumme (€)";
+        chart5.addSeries(null, dimple.plot.bar);
+        chart5.draw();
+
+        
+
+
+    </script>
+
+</head>
+
+
+<body>
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/profile">Business Intelligence App DC</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav navbar-right">
+          <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> Ausloggen</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+
+<div class="container-fluid">
+    <div class="row content">
+
+        <!-- Linke Seite (seitliche Navigationsleiste) -->
+        <div class="col-sm-3 sidenav">
+            <h2>Hallo <%= user %>!</h2>
+            <ul class="nav nav-pills nav-stacked">
+                <li class="active"><a href="#section1"><span class="glyphicon glyphicon-stats"> Dashboard</a></li>
+                <li><a href="#section2"><span class="glyphicon glyphicon-cog"> Einstellungen</a></li>
+            </ul>
+        </div>
+        <br>
+
+        <!-- Rechte Seite (Dashboard / Einstellungen) -->
+        <div class="col-sm-9" id="section1">
+            <!-- *****************
+            **********************
+            REIHE 2
+            **********************
+            ******************* -->
+            <div class="row">
+                <!-- Linkes Feld in Reihe 1 -->
+                <div class="col-lg-6">
+                    <div class="well">
+                        <p>Gesamtumsatz im Jahr 2017: <strong><%=result4_1%>€</strong></p>
+
+                        <!-- Auswahl-Button für parametrisierbares Jahr von KPI1 (UmsatzProMonat) -->
+                        <select id="button_kpi1">
+                            <% console.log(years_kpi1);
+                            for(var i of years_kpi1) { %>
+                            <!-- Benutze bei i."year" den Nametag, den man in der Query der Spalte zuweist. -->
+                            <option><%=i.year%></option><%
+                            }
+                            %>
+                        </select>
+
+                        <!-- Button um Diagramm von KPI1 (UmsatzProMonat) ein- & auszublenden -->
+                        <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi1" data-toggle="collapse" type="button">Umsatz pro Monat vergleichen</button>
+                        <!-- Diagramm KPI 1 -->
+                        <div id="chart_kpi1" class="collapse in" aria-expanded="false" style>
+                            <!--***********************
+                            Hier kommt das Diagramm für KPI 1 (Umsatz pro Monat) hin
+                            ************************-->
+                        </div>
+<!--
+                        <div id = "div_kpi5" class="kpi_div">
+                    		<button id="button_kpi5" class="kpi_button_mitte" onclick="kpi5(this.id)" >Mehr</button>
+                    		<svg id="svg_kpi5" width="650" height="400"></svg>
+                    	</div>
+                    	<div id = "div_kpi6" class="kpi_div">
+                    		<button id="button_kpi6" class="kpi_button_mitte" onclick="kpi6(this.id)" >Mehr</button>
+                    		<svg id="svg_kpi6" width="650" height="400"></svg>
+                    	</div>
+                    	<div id = "div_kpi7" class="kpi_div">
+                    		<svg id="svg_kpi7" width="650" height="400"></svg>
+                    	</div>
+                    	<div id = "div_kpi8" class="kpi_div">
+                    		<p> Durchschnittlicher Warenkorbwert: <%=result8_1%>€ </p>
+                    		<p> Rate nicht bestellter Warenkörbe <%=result8_2%>% </p>
+                    	</div> -->
+
+                    </div>
+                </div>
+
+                <!-- Rechtes Feld in Reihe 1 -->
+                <div class="col-lg-6">
+                    <div class="well">
+                        <!-- Button um Diagramm von KPI2 (XXXXXXXX) ein- & auszublenden -->
+                        <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi2" data-toggle="collapse" type="button">Durchschnittliche Bestellsumme anzeigen</button>
+                        <!-- Diagramm KPI 2 -->
+                        <div id="chart_kpi2" class="collapse in" aria-expanded="false" style>
+                            <!--***********************
+                            Hier kommt das Diagramm für KPI 2 (Durchschnittliche Bestellsumme) hin
+                            ************************-->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- *****************
+            **********************
+            REIHE 2
+            **********************
+            ******************* -->
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="well">
+
+
+                    	<!-- <div id = "div_kpi6" class="kpi_div">
+                    		<button id="button_kpi6" class="kpi_button_mitte" onclick="kpi6(this.id)" >Mehr</button>
+                    		<svg id="svg_kpi6" width="650" height="400"></svg>
+                    	</div>
+                    	<div id = "div_kpi7" class="kpi_div">
+                    		<svg id="svg_kpi7" width="650" height="400"></svg>
+                    	</div>
+                    	<div id = "div_kpi8" class="kpi_div">
+                    		<p> Durchschnittlicher Warenkorbwert: <%=result8_1%>€ </p>
+                    		<p> Rate nicht bestellter Warenkörbe <%=result8_2%>% </p>
+                    	</div> -->
+
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="well">
+                        <!-- hier das Diagramm3 -->
+                    </div>
+                </div>
+
+            </div>
+
+        <!-- <div class="col-sm-9" id="section2">
+            hier muss noch der Einstellungen-Tab bearbeitet werden
+        </div> -->
+
+
+
+    </div>
+</div>
+
+
+<footer class="container-fluid text-center" id="footer">
+
+</footer>
+
+ </body>

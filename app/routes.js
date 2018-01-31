@@ -51,13 +51,13 @@ module.exports = function(app, passport, connectionLoginDB) {
     // we will want this protected so you have to be logged in to visit
     // we will use route middleware to verify this (the isLoggedIn function)
     app.get('/profile', isLoggedIn, function(req, res) {
-        console.log("================== Jetzt kommen Daten =================");
 
-		var selectString = 'SELECT * FROM users WHERE username = "' + req.user.username + '"';
+        console.log("================== Profile-Seite wird aufgerufen =================");
+
 		var connectionCustomerDB;
 
         // mit Kunden-DB verbinden
-		connectionLoginDB.query(selectString, function(err, results) {
+		connectionLoginDB.query('SELECT * FROM users WHERE username = "' + req.user.username + '"', function(err, results) {
 
 			connectionCustomerDB = mysql.createConnection({
 			  host     : results[0].host,
@@ -71,104 +71,157 @@ module.exports = function(app, passport, connectionLoginDB) {
             console.log("'" + req.user.username + "'" + " hat die Verbindung zu seiner verknüpften Datenbank hergestellt.");
 
             // Setup der verschiedenen KPI-Ergebnisse
-    	//	var res1;
-    		var res2;
-    		var res3;
-    		var res4_1;
-    		var res4_2;
-    		var res5;
-    		var res6;
-
-            /*
-    		//testquery	1
-    		connectionCustomerDB.query('SELECT description AS name, id AS age FROM item where id<10', function(err, results) {
-    		  if (!err){
-    			res1=results;
-    		  }
-    		  else{
-    			console.log('Error while performing Query.', err);
-    		  }
-    		});
-            */
-
-    		//testquery	2
-    		connectionCustomerDB.query('SELECT session_date AS date, item_total_order_qty	AS close FROM visitor WHERE id<6606788 ORDER BY session_date ASC ', function(err, results) {
-    		  if (!err){
-    			res2=results;
-
-    		  }
-    		  else{
-    			console.log('Error while performing Query.', err);
-    		  }
-    		});
-
-    		//testquery	3
-    		connectionCustomerDB.query('SELECT description AS age, total_order_qty AS population FROM item WHERE id<9 AND id>1 ', function(err, results) {
-    		  if (!err){
-    			res3=results;
-    		  }
-    		  else{
-    			console.log('Error while performing Query.', err);
-    		  }
-    		});
+            var kpis = require('./kpi_queries.js');
+            // var years = kpis.getYearsData(connectionCustomerDB),
+            //     kpi1_1 = kpis.getKpiUmsatzProJahr(connectionCustomerDB),
+            //     kpi1_2 = kpis.getKpiUmsatzProMonat(connectionCustomerDB);
+            var kpi1_1,
+                years,
+                kpi1_2,
+                kpi2,
+                kpi3,
+                kpi4
+                ;
 
 
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
 
-            //Umsatz pro Jahr --> Jahr einlesen!!
-    		connectionCustomerDB.query('SELECT SUM(item_total_order_value) AS umsatz'+
-    			' FROM visitor WHERE YEAR(session_date)=2017',
-    			function(err, results) {
-            		if (!err) {
-            			res4_1 = JSON.stringify(results[0].umsatz);
-            		}
-            		else {
-            			console.log('Error while performing Query.', err);
-            		}
-    		});
+                                                // KPI 1_1: Umsatz pro Jahr --> Jahr einlesen!!
+                                                // RETURN: Jahresumsatz als Zahl
+                                                connectionCustomerDB.query(
+                                                    'SELECT SUM(item_total_order_value) AS umsatz \
+                                                    FROM visitor \
+                                                    WHERE YEAR(session_date) = 2017',
+                                                    function(err, results) {
+                                                        if (!err) {
+                                                            kpi1_1 = JSON.stringify(results[0].umsatz);
+                                                        }
+                                                        else {
+                                                            console.log('Error while performing Query KPI 1_1 (Umsatz pro Jahr).', err);
+                                                        }
+                                                    }
+                                                );
 
-    		// Umsatz pro Monat --> JAHR EINLESEN!!
-    		connectionCustomerDB.query('SELECT MONTHNAME(session_date)  AS monat,'+
-                ' SUM(item_total_order_value) AS umsatz'+
-    			' FROM visitor WHERE YEAR(session_date) = 2017'+
-    			' GROUP BY YEAR(session_date), MONTHNAME(session_date)',
-    			function(err, results) {
-                    if (!err) {
-                        res4_2 = results;
-            		}
-            		else {
-            			console.log('Error while performing Query.', err);
-            		}
-    		});
+                                                // Helper: Jahre für Umsatz pro Monat --> Jahr einlesen!!
+                                                // RETURN: JSON mit verschiedenen Jahren, in denen Daten zur Verfügung stehen
+                                                connectionCustomerDB.query(
+                                                    'SELECT YEAR(session_date) AS year \
+                                                    FROM visitor \
+                                                    GROUP BY year',
+                                                    function(err, results) {
+                                                        if (!err) {
+                                                            years = results;
+                                                        }
+                                                        else {
+                                                            console.log('Error while performing Query YearsData.', err);
+                                                        }
+                                                    }
+                                                );
 
-    		// Durchschnittliche Bestellsumme pro Monat --> JAHR EINLESEN!!
-    		connectionCustomerDB.query('SELECT MONTHNAME(session_date) as monat,'+
-    		' AVG(item_total_order_value) AS avg_bestellsumme'+
-    		' FROM visitor WHERE item_total_order_value != 0'+
-    		' AND YEAR(session_date) = 2017'+
-    		' GROUP BY YEAR(session_date), MONTHNAME(session_date)',
-            function (err, results) {
-        		  if (!err) {
-        			res5 = results;
-        		  }
-        		  else {
-        			console.log('Error while performing Query.', err);
-        		  }
-    		});
 
-            // Auf KPI-Query-Ergebnisse warten
-    		while (res2 === undefined || res3 === undefined || res4_1 === undefined || res4_2 === undefined || res5 === undefined) {
-    			deasync.runLoopOnce();
-    		}
+                                                // KPI 1_2: Umsatz pro Monat --> JAHR EINLESEN!!
+                                                // RETURN: JSON mit Monate und jeweiligem Umsatz (bis zu 12 Werte-Paare)
+                                                connectionCustomerDB.query(
+                                                    'SELECT DATE_FORMAT(session_date, "%m/%Y")  AS monat, SUM(item_total_order_value) AS umsatz \
+                                                    FROM visitor \
+                                                    WHERE YEAR(session_date) = (SELECT MAX(YEAR(session_date)) FROM visitor) \
+                                                    GROUP BY YEAR(session_date), DATE_FORMAT(session_date, "%m/%Y") \
+                                                    ORDER BY ANY_VALUE(session_date) DESC',
+                                                    function(err, results) {
+                                                        if (!err) {
+                                                            kpi1_2 = results;
+                                                        }
+                                                        else {
+                                                            console.log('Error while performing Query KPI 1_2 (Umsatz pro Monat).', err);
+                                                        }
+                                                    }
+                                                );
+
+
+                                                // KPI 2: Durchschnittliche Bestellsumme --> JAHR EINLESEN!!
+                                                // RETURN: JSON mit Monate und jeweiliger durchschnittlichen Bestellsumme (bis zu 12 Werte-Paare)
+                                                connectionCustomerDB.query(
+                                                    'SELECT DATE_FORMAT(session_date, "%m/%Y") as monat, AVG(item_total_order_value) AS avg_bestellsumme \
+                                                    FROM visitor \
+                                                    WHERE item_total_order_value != 0 AND YEAR(session_date) = 2017 \
+                                                    GROUP BY DATE_FORMAT(session_date, "%m/%Y") \
+                                                    ORDER BY ANY_VALUE(session_date) DESC',
+                                        			function(err, results) {
+                                                		if (!err){
+                                                            kpi2 = results;
+                                                		}
+                                            			else {
+                                                            console.log('Error while performing Query KPI 2 (Durchschnittliche Bestellsumme).', err);
+                                            			}
+                                                    }
+                                                );
+
+                                                // KPI 3: Conversionrate in absoluten Zahlen pro Monat
+                                                // RETURN: JSON mit Monate und Conversionrate pro Monat (bis zu 12 Werte-Paare)
+                                                connectionCustomerDB.query(
+                                                    'SELECT o.monat, o.anzahl_orders, v.anzahl_visitor \
+                                                    FROM    ( \
+                                                            SELECT COUNT(*) AS anzahl_orders, \
+                                                            DATE_FORMAT(FROM_UNIXTIME(creation_timestamp), "%m/%Y") AS monat \
+                                                            FROM tracking_events \
+                                        					WHERE event_type = "ORDER_COMPLETE" \
+                                                            GROUP BY DATE_FORMAT(FROM_UNIXTIME(creation_timestamp), "%m/%Y") \
+                                                            ORDER BY ANY_VALUE(FROM_UNIXTIME(creation_timestamp)) DESC \
+                                                            ) o, \
+                                                            ( \
+                                                            SELECT COUNT(*) AS anzahl_visitor, DATE_FORMAT(session_date, "%m/%Y") AS monat \
+                                                            FROM visitor \
+                                                            GROUP BY DATE_FORMAT(session_date, "%m/%Y") \
+                                                            ORDER BY ANY_VALUE(session_date) DESC \
+                                                            ) v \
+                                                    WHERE o.monat = v.monat;',
+                                                    function(err, results) {
+                                                        if (!err){
+                                                            kpi3 = results;
+                                                        }
+                                                        else{
+                                            				console.log('Error while performing Query KPI 3 (Conversionrate pro Monat).', err);
+                                                        }
+                                                    }
+                                                );
+
+                                                // KPI 4: Umsatz pro Stunde als Gesamtsumme
+                                                // RETURN: JSON mit Stunden und jeweiligem Gesamtumsatz (bis zu 24 Werte-Paare)
+                                                connectionCustomerDB.query(
+                                                    'SELECT HOUR(session_date) as stunde, SUM(item_total_order_value) AS umsatz \
+                                                    FROM visitor \
+                                                    GROUP BY HOUR(session_date);',
+                                                    function(err, results) {
+                                                        if (!err){
+                                                            kpi4 = results;
+                                                        }
+                                                        else{
+                                                            console.log('Error while performing Query KPI 4 (Umsatz pro Stunde als Gesamtsumme).', err);
+                                                        }
+                                                    }
+                                                );
+
+
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+
+            while (years === undefined || kpi1_1 === undefined || kpi1_2 === undefined || kpi2 === undefined || kpi3 === undefined || kpi4 === undefined) {
+            	deasync.runLoopOnce();
+            }
 
     		res.render('profile.ejs', {
 
                 user        : req.user.username,
-                result2     : res2,
-                result3     : res3,
-                result4_1   : res4_1,
-                result4_2   : res4_2,
-                result5     : res5
+                years_kpi1  : years,
+                result4_1   : kpi1_1,
+                result4_2   : kpi1_2,
+                result5     : kpi2,
+                result6     : kpi3,
+                result7     : kpi4
             });
+
 
         });
     });
