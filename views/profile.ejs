@@ -18,7 +18,7 @@
         }
 
         /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
-        .row.content {height: 450px}
+        .row.content {height: 800px}
 
         /* Set gray background color and 100% height */
         .sidenav {
@@ -44,13 +44,6 @@
         }
     </style>
     <script type="text/javascript">
-
-        $("#button_kpi1").change(function() {
-            console.log("-.-.-.-.-.-Button wurde geaendert: " + $(this).val());
-            $.get("?year=" + $(this).val(), function(data, status) {
-
-          })
-        });
 
         // // TO-DO responsive resizing
         // window.onresize = function () {
@@ -95,8 +88,56 @@
         </div>
         <br>
 
-        <!-- Rechte Seite (Dashboard / Einstellungen) -->
+        <!-- Rechte Seite (Dashboard) -->
         <div class="col-sm-9" id="section1">
+            <!-- *****************
+            **********************
+            REIHE 0 (TOP: Gesamtumsatz im Jahr X)
+            **********************
+            ******************* -->
+            <div class="row">
+                <!-- Linkes Feld in Reihe 0 (Umsatz) -->
+                <div class="col-xs-8">
+                    <div class="well">
+                        <h3 class="text-center">Gesamtumsatz im Jahr &nbsp;
+                                <!-- Auswahl-Button für parametrisierbares Jahr von KPI1 (UmsatzProMonat) -->
+                                <select id="button_kpi1">
+                                    <% console.log(years_kpi1);
+                                    for(var i of years_kpi1) { %>
+                                    <!-- Benutze bei i."year" den Nametag, den man in der Query der Spalte zuweist. -->
+                                    <option><%=i.year%></option><%
+                                    }
+                                    %>
+                                    <option>2016</option>
+                                    <option>2015</option>
+                                </select>
+                            : <strong><%=result4_1%>€</strong>
+
+                            <script>
+                                // Send GET-Request when SELECT-Button changes
+                                $("#button_kpi1").change(function() {
+                                    console.log("-.-.-.-.-.-Button wurde geaendert: " + $(this).val());
+                                    $.get("?year=" + $(this).val(), function(data, status) {
+
+                                  })
+                                });
+                            </script>
+                        </h3>
+                    </div>
+                </div>
+
+                <!-- Rechtes Feld in Reihe 0 (Warenkörbe) -->
+                <div class="col-xs-4">
+                    <div class="well">
+                        <!-- KPI 5: Warenkörbe-Daten -->
+                        <!-- ************** TO-DO: Info-Button hinzufügen, wo man die Erklärung für die Werte erhält ********** -->
+                        <p class="text-left">Durchschnittlicher Warenkorbwert: <strong><%=result8_1%>€</strong></p>
+                		<p class="text-left">Rate nicht-bestellter Warenkörbe: <strong><%=result8_2%>%</strong></p>
+                    </div>
+                </div>
+
+            </div>
+
             <!-- *****************
             **********************
             REIHE 1
@@ -106,22 +147,9 @@
                 <!-- Linkes Feld in Reihe 1 -->
                 <div class="col-lg-6">
                     <div class="well">
-                        <p>Gesamtumsatz im Jahr
-                            <!-- Auswahl-Button für parametrisierbares Jahr von KPI1 (UmsatzProMonat) -->
-                            <select id="button_kpi1">
-                                <% console.log(years_kpi1);
-                                for(var i of years_kpi1) { %>
-                                <!-- Benutze bei i."year" den Nametag, den man in der Query der Spalte zuweist. -->
-                                <option><%=i.year%></option><%
-                                }
-                                %>
-                            </select>
-                        : <strong><%=result4_1%>€</strong>
 
                         <!-- Button um Diagramm von KPI1 (UmsatzProMonat) ein- & auszublenden -->
                         <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi1" data-toggle="collapse" type="button">Umsatz pro Monat vergleichen</button>
-
-                        </p>
 
                         <!-- Diagramm KPI 1 -->
                         <div id="chart_kpi1" class="collapse in" aria-expanded="false" style>
@@ -258,17 +286,109 @@
                         </div>
 
                     </div>
-
                 </div>
+            </div>
 
+            <!-- *****************
+            **********************
+            REIHE 3
+            **********************
+            ******************* -->
+            <div class="row">
+                <!-- Linkes Feld in Reihe 3 -->
+                <div class="col-lg-6">
+                    <div class="well">
+                        <!-- Button um Diagramm von KPI 6 ein- & auszublenden -->
+                        <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi6" data-toggle="collapse" type="button">Top Trending-Produkte der letzten 30 Tage</button>
+                        <!-- Diagramm KPI 6 -->
+                        <div id="chart_kpi6" class="collapse in" aria-expanded="false" style>
+                            <br>
+                            <!-- SELECT-Button -->
+                            <select id="button_kpi6">
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                                <option>10</option>
+                                <option>15</option>
+                                <option>20</option>
+                            </select>
+                            <!--***********************
+                            Hier kommt das Diagramm für KPI 6 (Top 10 Trending-Produkte der letzten 30 Tage) hin
+                            ************************-->
+                            <script>
+                                // Send GET-Request when SELECT-Button changes
+                                $("#button_kpi6").change(function() {
+                                        console.log("-.-.-.-.-.-Button wurde geaendert: " + $(this).val());
+                                        $.get("?numberTopProducts=" + $(this).val(), function(data, status) {})
+                                });
+                                //
+                                // TO-DO: letzte 30 Tage von aktuellem Datum aus
+                                //
+                                // KPI-Diagramm Top 10 Trending-Produkte im Monat vor dem 20.3.2017
+                                //
+                                var svg9 = dimple.newSvg("#chart_kpi6", "100%", 350);
+                                var data9 = <%-JSON.stringify(result9)%>;
+                                var chart9 = new dimple.chart(svg9, data9);
+                                var y9 = chart9.addCategoryAxis("y", "description");
+                                y9.addOrderRule("umsatz");
+                                y9.title = "Item";
+                                y9.hidden = true;
+                                var x9 = chart9.addMeasureAxis("x", "umsatz");
+                                x9.title = "Umsatz (€)";
+                                var s9 = chart9.addSeries(null, dimple.plot.bar);
+                                s9.afterDraw = function (shape, data) {
+                                    var s = d3.select(shape),
+                                    rect = {
+                                        x: parseFloat(chart9.x),
+                                        y: parseFloat(s.attr("y")),
+                                        width: parseFloat(s.attr("width")),
+                                        height: parseFloat(s.attr("height"))
+                                    };
+                                    svg9.append("text")
+                                        .attr("x", rect.x+50)
+                                        .attr("y", rect.y + rect.height / 2 + 3.5)
+                                        .style("text-anchor", "left")
+                                        .style("font-size", "12px")
+                                        .style("font-family", "sans-serif")
+                                        .style("pointer-events", "none")
+                                        .text(data.y);
+                                };
+                                chart9.draw();
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- Rechtes Feld in Reihe 3 -->
+                <div class="col-lg-6">
+                    <div class="well">
+                        <!-- Button um Diagramm von KPI 7 ein- & auszublenden -->
+                        <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi4" data-toggle="collapse" type="button">XXXXXXXX anzeigen</button>
+                        <!-- Diagramm KPI 7 -->
+                        <div id="chart_kpi4" class="collapse in" aria-expanded="false" style>
+                            <!--***********************
+                            Hier kommt das Diagramm für KPI 7 ()  hin
+                            ************************-->
+                            <script>
+                                //
+                                // KPI-Diagramm X
+                                //
+
+                            </script>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- Rechte Seite (Einstellungen) -->
         <!-- <div class="col-sm-9" id="section2">
             hier muss noch der Einstellungen-Tab bearbeitet werden
         </div> -->
-
-
-
-            </div>
-        </div>
 
     </div>
 </div>

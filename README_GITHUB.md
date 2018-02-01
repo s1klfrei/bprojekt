@@ -1,7 +1,7 @@
 GROBER ABLAUF:
 
-Aktuellen master-Branch vom Server downloaden 
-(vorher mit git status sicherstellen, dass man sich auf dem master-Branch befindet. 
+Aktuellen master-Branch vom Server downloaden
+(vorher mit git status sicherstellen, dass man sich auf dem master-Branch befindet.
 Wenn nicht: git checkout master):
 git pull
 
@@ -34,3 +34,10 @@ git branch -d meinfeature
 Aktualisierten master auf den Server pushen:
 git push https://github.com/s1klfrei/bprojekt.git
 
+
+
+
+Ohne Branch:
+git add .
+git commit -m „[commit nachricht(was wurde geändert)]“
+git push
