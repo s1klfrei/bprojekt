@@ -24,7 +24,7 @@
         }
 
         /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
-        .row.content {height: 800px}
+        .row.content {height: 1200px}
 
         /* Set dc background color and 100% height; color before: f1f1f1*/
         .sidenav {
@@ -152,9 +152,10 @@
                 <!-- Rechtes Feld in Reihe 0 (Warenkörbe) -->
                 <div class="col-xs-4">
                     <div class="well">
-                        <!-- KPI 5: Warenkörbe-Daten -->
+                        <!-- KPI 5: Warenkorb- und Bestell-Daten und -->
                         <!-- ************** TO-DO: Info-Button hinzufügen, wo man die Erklärung für die Werte erhält ********** -->
                         <p class="text-left">Durchschnittlicher Warenkorbwert: <strong><%=result8_1%>€</strong></p>
+                        <p class="text-left">Durchschnittliche Bestellsumme: <strong><%=result8_3%>€</strong></p>
                 		<p class="text-left">Rate nicht-bestellter Warenkörbe: <strong><%=result8_2%>%</strong></p>
                     </div>
                 </div>
@@ -175,11 +176,20 @@
                         <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi1" data-toggle="collapse" type="button">Umsatz pro Monat vergleichen</button>
 
                         <!-- Diagramm KPI 1 -->
-                        <div id="chart_kpi1" class="collapse in" aria-expanded="false" style>
+                        <div id="chart_kpi1" class="collapse in" aria-expanded="false">
                             <!--***********************
                             Hier kommt das Diagramm für KPI 1 (Umsatz pro Monat) hin
                             ************************-->
                             <script type="text/javascript">
+                                // Wenn Year geändert wird, Diagramm anpassen
+                                $("#button_kpi1").change(function() {
+                                        console.log("-.-.-.-.-.-Year-Button wurde geaendert: " + $(this).val());
+                                        window.location.replace("?year=" + $(this).val() + "&numberTopProducts=" + $("#button_kpi6").val());
+                                        /*$.get("?numberTopProducts=" + $(this).val(), function(data, status) {
+                                            data9 = <%-JSON.stringify(result9)%>;
+                                            console.log(<%-JSON.stringify(result9)%>);
+                                        })*/
+                                });
                                 //
                                 // KPI-Diagramm Umsatz pro Monat
                                 //
@@ -202,27 +212,26 @@
                 <!-- Rechtes Feld in Reihe 1 -->
                 <div class="col-lg-6">
                     <div class="well">
-                        <!-- Button um Diagramm von KPI 2 ein- & auszublenden -->
-                        <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi2" data-toggle="collapse" type="button">Durchschnittliche Bestellsumme anzeigen</button>
-                        <!-- Diagramm KPI 2 -->
-                        <div id="chart_kpi2" class="collapse in" aria-expanded="false" style>
+                        <!-- Button um Diagramm von KPI 4 ein- & auszublenden -->
+                        <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi4" data-toggle="collapse" type="button">Umsatz über Zeit (absolut) anzeigen</button>
+                        <!-- Diagramm KPI 3 -->
+                        <div id="chart_kpi4" class="collapse in" aria-expanded="false" style>
                             <!--***********************
-                            Hier kommt das Diagramm für KPI 2 (Durchschnittliche Bestellsumme) hin
+                            Hier kommt das Diagramm für KPI 4 (Umsatz über Stunde)  hin
                             ************************-->
                             <script>
                                 //
-                                // KPI-Diagramm Durchschnittliche Bestellsumme
+                                // KPI-Diagramm Umsatz über Stunde
                                 //
-                                var svg5 = dimple.newSvg("#chart_kpi2", "100%", 250);
-                                var data5 = <%-JSON.stringify(result5)%>
-                                var chart5 = new dimple.chart(svg5, data5);
-                                var x5 = chart5.addCategoryAxis("x", "monat");
-                                x5.addOrderRule("monat");
-                                x5.title = "Monat";
-                                var y5 = chart5.addMeasureAxis("y", "avg_bestellsumme");
-                                y5.title = "Durchschnittliche Bestellsumme (€)";
-                                chart5.addSeries(null, dimple.plot.bar);
-                                chart5.draw();
+                        		var svg7 = dimple.newSvg("#chart_kpi4", "100%", 250);
+                        		var data7 = <%-JSON.stringify(result7)%>
+                        		var chart7 = new dimple.chart(svg7, data7);
+                        		var x7 = chart7.addCategoryAxis("x", "stunde");
+                        		var y7 = chart7.addMeasureAxis("y", "umsatz");
+                                y7.title = "Umsatz (%)";
+                                x7.title = "Uhrzeit (h)";
+                        		chart7.addSeries(null, dimple.plot.line);
+                        		chart7.draw();
                             </script>
                         </div>
                     </div>
@@ -239,10 +248,82 @@
                 <!-- Linkes Feld in Reihe 2 -->
                 <div class="col-lg-6">
                     <div class="well">
+                        <!-- Button um Diagramm von KPI 6 ein- & auszublenden -->
+                        <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi6" data-toggle="collapse" type="button">Top Trending-Produkte der letzten 30 Tage</button>
+                        <!-- SELECT-Button -->
+                        <span>
+                            <select id="button_kpi6">
+                                <% if (numberTopProducts == 1) %>selected<% ; %>
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                                <option selected>10</option>
+                                <option>15</option>
+                                <option>20</option>
+                            </select>
+                        </span>
+                        <!-- Diagramm KPI 6 -->
+                        <div id="chart_kpi6" class="collapse in" aria-expanded="false">
+
+                            <!--***********************
+                            Hier kommt das Diagramm für KPI 6 (Top 10 Trending-Produkte der letzten 30 Tage) hin
+                            ************************-->
+                            <script>
+                                //
+                                // TO-DO: letzte 30 Tage von aktuellem Datum aus
+                                //
+                                // KPI-Diagramm Top 10 Trending-Produkte im Monat vor dem 20.3.2017
+                                //
+                                // Send GET-Request when SELECT-Button changes
+                                $("#button_kpi6").change(function() {
+                                        console.log("-.-.-.-.-.-Button wurde geaendert: " + $(this).val());
+                                        window.location.replace("?year=" + $("#button_kpi1").val() + "&numberTopProducts=" + $(this).val());
+                                        /*$.get("?numberTopProducts=" + $(this).val(), function(data, status) {
+                                            data9 = <%-JSON.stringify(result9)%>;
+                                            console.log(<%-JSON.stringify(result9)%>);
+                                        })*/
+                                });
+                                var svg9 = dimple.newSvg("#chart_kpi6", "100%", 350);
+                                var data9 = <%-JSON.stringify(result9)%>;
+                                var chart9 = new dimple.chart(svg9, data9);
+                                var y9 = chart9.addCategoryAxis("y", "Beschreibung");
+                                y9.addOrderRule("Anzahl");
+                                y9.title = "Item";
+                                y9.hidden = true;
+                                var x9 = chart9.addMeasureAxis("x", "Anzahl");
+                                x9.title = "Anzahl der bestellten Produkte";
+                                var s9 = chart9.addSeries(null, dimple.plot.bar);
+                                s9.afterDraw = function (shape, data) {
+                                    var s = d3.select(shape),
+                                    rect = {
+                                        x: parseFloat(chart9.x),
+                                        y: parseFloat(s.attr("y")),
+                                        width: parseFloat(s.attr("width")),
+                                        height: parseFloat(s.attr("height"))
+                                    };
+                                    svg9.append("text")
+                                        .attr("x", rect.x+50)
+                                        .attr("y", rect.y + rect.height / 2 + 3.5)
+                                        .style("text-anchor", "left")
+                                        .style("font-size", "12px")
+                                        .style("font-family", "sans-serif")
+                                        .style("pointer-events", "none")
+                                        .text(data.y);
+                                };
+                                chart9.draw();
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- Rechtes Feld in Reihe 2 -->
+                <div class="col-lg-6">
+                    <div class="well">
                         <!-- Button um Diagramm von KPI 3 ein- & auszublenden -->
                         <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi3" data-toggle="collapse" type="button">Conversionrate (absolut) anzeigen</button>
                         <!-- Diagramm KPI 3 -->
-                        <div id="chart_kpi3" class="collapse in" aria-expanded="false" style>
+                        <div id="chart_kpi3" class="collapse in" aria-expanded="false">
                             <!--***********************
                             Hier kommt das Diagramm für KPI 3 (Conversionrate in absoluten Zahlen pro Monat) hin
                             ************************-->
@@ -287,32 +368,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- Rechtes Feld in Reihe 2 -->
-                <div class="col-lg-6">
-                    <div class="well">
-                        <!-- Button um Diagramm von KPI 4 ein- & auszublenden -->
-                        <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi4" data-toggle="collapse" type="button">Umsatz über Zeit (absolut) anzeigen</button>
-                        <!-- Diagramm KPI 3 -->
-                        <div id="chart_kpi4" class="collapse in" aria-expanded="false" style>
-                            <!--***********************
-                            Hier kommt das Diagramm für KPI 4 (Umsatz über Stunde)  hin
-                            ************************-->
-                            <script>
-                                //
-                                // KPI-Diagramm Umsatz über Stunde
-                                //
-                        		var svg7 = dimple.newSvg("#chart_kpi4", "100%", 250);
-                        		var data7 = <%-JSON.stringify(result7)%>
-                        		var chart7 = new dimple.chart(svg7, data7);
-                        		var x7 = chart7.addCategoryAxis("x", "stunde");
-                        		chart7.addMeasureAxis("y", "umsatz");
-                        		chart7.addSeries(null, dimple.plot.line);
-                        		chart7.draw();
-                            </script>
-                        </div>
-
-                    </div>
-                </div>
             </div>
 
             <!-- *****************
@@ -323,93 +378,25 @@
             <div class="row">
                 <!-- Linkes Feld in Reihe 3 -->
                 <div class="col-lg-6">
-                    <div class="well">
-                        <!-- Button um Diagramm von KPI 6 ein- & auszublenden -->
-                        <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi6" data-toggle="collapse" type="button">Top Trending-Produkte der letzten 30 Tage</button>
-                        <!-- SELECT-Button -->
-                        <span>
-                            <select id="button_kpi6">
-                                <option <% if (numberTopProducts == 1) %>selected<% ; %>>1</option>
-                                <option <% if (numberTopProducts == 2) %>selected<% ; %>>2</option>
-                                <option <% if (numberTopProducts == 3) %>selected<% ; %>>3</option>
-                                <option <% if (numberTopProducts == 4) %>selected<% ; %>>4</option>
-                                <option <% if (numberTopProducts == 5) %>selected<% ; %>>5</option>
-                                <option <% if (numberTopProducts == 10) %>selected<% ; %>>10</option>
-                                <option <% if (numberTopProducts == 15) %>selected<% ; %>>15</option>
-                                <option <% if (numberTopProducts == 20) %>selected<% ; %>>20</option>
-                            </select>
-                        </span>
-                        <!-- Diagramm KPI 6 -->
-                        <div id="chart_kpi6" class="collapse in" aria-expanded="false" style>
 
-                            <!--***********************
-                            Hier kommt das Diagramm für KPI 6 (Top 10 Trending-Produkte der letzten 30 Tage) hin
-                            ************************-->
-                            <script>
-                                //
-                                // TO-DO: letzte 30 Tage von aktuellem Datum aus
-                                //
-                                // KPI-Diagramm Top 10 Trending-Produkte im Monat vor dem 20.3.2017
-                                //
-                                // Send GET-Request when SELECT-Button changes
-                                $("#button_kpi6").change(function() {
-                                        console.log("-.-.-.-.-.-Button wurde geaendert: " + $(this).val());
-                                        window.location.replace("?numberTopProducts=" + $(this).val());
-                                        /*$.get("?numberTopProducts=" + $(this).val(), function(data, status) {
-                                            data9 = <%-JSON.stringify(result9)%>;
-                                            console.log(<%-JSON.stringify(result9)%>);
-                                        })*/
-                                });
-                                var svg9 = dimple.newSvg("#chart_kpi6", "100%", 350);
-                                var data9 = <%-JSON.stringify(result9)%>;
-                                var chart9 = new dimple.chart(svg9, data9);
-                                var y9 = chart9.addCategoryAxis("y", "description");
-                                y9.addOrderRule("umsatz");
-                                y9.title = "Item";
-                                y9.hidden = true;
-                                var x9 = chart9.addMeasureAxis("x", "umsatz");
-                                x9.title = "Umsatz (€)";
-                                var s9 = chart9.addSeries(null, dimple.plot.bar);
-                                s9.afterDraw = function (shape, data) {
-                                    var s = d3.select(shape),
-                                    rect = {
-                                        x: parseFloat(chart9.x),
-                                        y: parseFloat(s.attr("y")),
-                                        width: parseFloat(s.attr("width")),
-                                        height: parseFloat(s.attr("height"))
-                                    };
-                                    svg9.append("text")
-                                        .attr("x", rect.x+50)
-                                        .attr("y", rect.y + rect.height / 2 + 3.5)
-                                        .style("text-anchor", "left")
-                                        .style("font-size", "12px")
-                                        .style("font-family", "sans-serif")
-                                        .style("pointer-events", "none")
-                                        .text(data.y);
-                                };
-                                chart9.draw();
-                            </script>
-                        </div>
-                    </div>
                 </div>
                 <!-- Rechtes Feld in Reihe 3 -->
                 <div class="col-lg-6">
                     <div class="well">
                         <!-- Button um Diagramm von KPI 7 ein- & auszublenden -->
                         <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi4" data-toggle="collapse" type="button">XXXXXXXX anzeigen</button>
-                        <!-- Diagramm KPI 7 -->
-                        <div id="chart_kpi4" class="collapse in" aria-expanded="false" style>
-                            <!--***********************
-                            Hier kommt das Diagramm für KPI 7 ()  hin
-                            ************************-->
-                            <script>
-                                //
-                                // KPI-Diagramm X
-                                //
+                        <!-- KPI 5: Warenkörbe-Daten -->
+                        <!-- ************** TO-DO: Info-Button hinzufügen, wo man die Erklärung für die Werte erhält ********** -->
+                        <p class="text-left">Durchschnittliche Zeit auf Seite: <strong><%=result10_1%> Sekunden</strong></p>
+                        <p class="text-left">Durchschnittliche Zeit bis zum Kauf: ca. <strong><%=result10_2%> Minuten</strong></p>
+                        <p class="text-left" style="text; color: #afafaf;"><small>Basierend auf Werten von <%=result10_3%>% der Besucher (Restliche erlauben kein Tracking)</small></p>
 
-                            </script>
-                        </div>
+                        <script>
+                            //
+                            // KPI-Diagramm X
+                            //
 
+                        </script>
                     </div>
                 </div>
             </div>
