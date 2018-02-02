@@ -2,26 +2,84 @@
 <html>
 <head>
     <title>BI App Dynamic Commerce</title>
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> <!-- load bootstrap css -->
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
     <style>
-        body        { padding-top:80px; }
+        /* Remove the navbar's default margin-bottom and rounded borders */
+        .navbar {
+          margin-bottom: 0;
+          border-radius: 0;
+          border-color: #97c33d;
+          background-color: white;
+        }
+
+        body {
+            background-color: white;
+        }
+
+        /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+        .row.content {height: 800px}
+
+        /* Set dc background color and 100% height; color before: f1f1f1*/
+        .sidenav {
+          padding-top: 20px;
+          background-color: #97c33d;
+          height: 100%;
+        }
+
+        .btn-primary {
+            background-color: #97c33d;
+            border-color: #97c33d;
+        }
+
+        .btn-primary:hover {
+            background-color: #74a80b;
+            border-color: #74a80b;
+        }
+
+        .btn-primary:focus {
+            background-color: #629102;
+            border-color: #629102;
+        }
+        
     </style>
 </head>
 <body>
-<div class="container">
 
-    <div class="jumbotron text-center">
-        <h1><span class="fa fa-lock"></span> Business Intelligence APP</h1>
-        <h2>von Dynamic Commerce</h2>
+    <nav class="navbar navbar-light">
+      <div class="container-fluid">
+        <div class="navbar-header" id="myNavbarHeader">
+            <a href="/profile">
+                <img class="d-inline-block align-top" alt="dynamic commerce logo" src="https://www.dc-solution.de/userdata/images/allgemein/Logo-dynamic-commerce.svg" style="margin-top: 3px; width: 120px; height:45px;">
+            </a>
+        </div>
+        <div class="collapse navbar-collapse" id="myNavbar">
+          <ul class="nav navbar-nav navbar-right">
+              <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> Ausloggen</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
 
-        <br>
-        <p>Anmelden oder Registrieren:</p>
 
-        <a href="/login" class="btn btn-default"><span class="fa fa-user"></span> Anmelden</a>
-        <a href="/signup" class="btn btn-default"><span class="fa fa-user"></span> Registrieren</a>
+
+
+
+    <br>
+    <br>
+    <div class="container">
+        <div class="well text-center">
+
+            <h1><span class="fa fa-lock"></span> Business Intelligence APP</h1>
+            <h2>von Dynamic Commerce</h2>
+
+            <br>
+            <hr />
+
+            <a href="/login" class="btn btn-default"><span class="fa fa-user"></span> Anmelden</a>
+        </div>
+
     </div>
-
-</div>
 </body>
 </html>

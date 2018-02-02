@@ -10,57 +10,60 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
     <title>BI App DC - Admin</title>
-    <style>
-        /* Remove the navbar's default margin-bottom and rounded borders */
-        .navbar {
-          margin-bottom: 0;
-          border-radius: 0;
-        }
+        <style>
+            /* Remove the navbar's default margin-bottom and rounded borders */
+            .navbar {
+              margin-bottom: 0;
+              border-radius: 0;
+              border-color: #97c33d;
+              background-color: white;
+            }
 
-        /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
-        .row.content {height: 800px}
+            body {
+                background-color: white;
+            }
 
-        /* Set gray background color and 100% height */
-        .sidenav {
-          padding-top: 20px;
-          background-color: #f1f1f1;
-          height: 100%;
-        }
+            /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+            .row.content {height: 800px}
 
-        /* Set black background color, white text and some padding */
-        footer {
-          background-color: #555;
-          color: white;
-          padding: 15px;
-        }
+            /* Set dc background color and 100% height; color before: f1f1f1*/
+            .sidenav {
+              padding-top: 20px;
+              background-color: #f1f1f1;
+              height: 100%;
+            }
 
-        /* On small screens, set height to 'auto' for sidenav and grid */
-        @media screen and (max-width: 767px) {
-          .sidenav {
-            height: auto;
-            padding: 15px;
-          }
-          .row.content {height:auto;}
-        }
-        /* Set Table-Style */
-        table {
-            font-family: arial, sans-serif;
-            border-collapse: collapse;
-            width: 100%;
-        }
+            .btn-primary {
+                background-color: #97c33d;
+                border-color: #97c33d;
+            }
 
-        td, th {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-        }
+            .btn-primary:hover {
+                background-color: #74a80b;
+                border-color: #74a80b;
+            }
 
-        tr:nth-child(even) {
-            background-color: #dddddd;
-        }
+            .btn-primary:focus {
+                background-color: #629102;
+                border-color: #629102;
+            }
 
+            /* Set black background color, white text and some padding */
+            footer {
+              background-color: #f1f1f1;
+              color: white;
+              padding: 15px;
+            }
 
-    </style>
+            /* On small screens, set height to 'auto' for sidenav and grid */
+            @media screen and (max-width: 767px) {
+              .sidenav {
+                height: auto;
+                padding: 15px;
+              }
+              .row.content {height:auto;}
+            }
+        </style>
     <script type="text/javascript">
 
         // // TO-DO responsive resizing
@@ -78,18 +81,21 @@
 
 <body>
 
-<nav class="navbar navbar-inverse">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <a class="navbar-brand" href="/profile">Business Intelligence App DC</a>
-    </div>
-    <div class="collapse navbar-collapse" id="myNavbar">
-      <ul class="nav navbar-nav navbar-right">
-          <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> Ausloggen</a></li>
-      </ul>
-    </div>
-  </div>
-</nav>
+    <nav class="navbar navbar-light">
+      <div class="container-fluid">
+        <div class="navbar-header" id="myNavbarHeader">
+            <a href="/profile">
+                <img class="d-inline-block align-top" alt="dynamic commerce logo" src="https://www.dc-solution.de/userdata/images/allgemein/Logo-dynamic-commerce.svg" style="margin-top: 3px; width: 120px; height:45px;">
+            </a>
+        </div>
+        <span class="navbar-brand" style="margin-left: 20px; color: #97c33d;">Business Intelligence App</span>
+        <div class="collapse navbar-collapse" id="myNavbar">
+          <ul class="nav navbar-nav navbar-right">
+              <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> Ausloggen</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
 
 
 
@@ -116,41 +122,66 @@
             <div class="row">
                 <div class="col-xs-12">
                     <div class="well">
-                        <h2 class="text-align-center">Bearbeiten Sie den Benutzer <%=selectedUser%>:</h2>
+                        <div>
+                            <% var actionDeleteLink = "/changeUser?username=" + selectedUser + "&" + "type=delete" %>
+                            <span>
+                                <form action=<%=actionDeleteLink%> method="post">
+                                <button type="submit" class="btn btn-danger btn-s pull-right"><span class="glyphicon glyphicon-trash"></span> Benutzer Löschen</button>
+                                </form>
+                            </span>
+                            <h2>Bearbeiten Sie den Benutzer <%=selectedUser%>:</h2>
+                            <hr />
+                        </div>
+                        <div>
+                            <!-- Zeige Flash-Message, wenn etwas geupdatet wird -->
+                            <% if (message.length > 0) {
+                                    if (message == 'Die Daten wurden erfolgreich geändert.') { %>
+                                        <div class="alert alert-success"><%= message %></div>
+                                    <% }
+                                    else { %>
+                                        <div class="alert alert-danger"><%= message %></div>
+                                    <% }
+                            } %>
 
-                        <!-- UPDATE FORM -->
-                        <form action="/changeUser" method="post">
-                            <div class="form-group">
-                                <label>Benutzername</label>
-                                <input type="text" class="form-control" name="username" value=<%=username%>>
-                            </div>
-                            <div class="form-group">
-                                <label>Passwort</label>
-                                <input type="password" class="form-control" name="password" value="**********">
-                            </div>
-                            <div class="form-group">
-                                <label>Datenbank-Host</label>
-                                <input type="text" class="form-control" name="host" value=<%=host%>>
-                            </div>
-                            <div class="form-group">
-                                <label>Datenbank-Benutzername</label>
-                                <input type="text" class="form-control" name="username_db" value=<%=username_db%>>
-                            </div>
-                            <div class="form-group">
-                                <label>Datenbank-Passwort</label>
-                                <input type="text" class="form-control" name="password_db" value=<%=password_db%>>
-                            </div>
-                            <div class="form-group">
-                                <label>Datenbank-Name</label>
-                                <input type="text" class="form-control" name="db" value=<%=db%>>
-                            </div>
+                            <!-- UPDATE FORM -->
+                            <% var actionLink = "/changeUser?username=" + selectedUser + "&" + "type=change" %>
+                            <form action=<%=actionLink%> method="post">
+                                <div class="form-group">
+                                    <label>Benutzername</label>
+                                    <input type="text" class="form-control" name="username" value=<%=username%>>
+                                </div>
+                                <div class="form-group">
+                                    <label>Passwort</label>
+                                    <input type="password" class="form-control" name="password" value=<%=password%>>
+                                </div>
+                                <div class="form-group">
+                                    <label>Passwort bestätigen</label>
+                                    <input type="password" class="form-control" name="passwordConfirm" value=<%=password%>>
+                                </div>
+                                <div class="form-group">
+                                    <label>Datenbank-Host</label>
+                                    <input type="text" class="form-control" name="host" value=<%=host%>>
+                                </div>
+                                <div class="form-group">
+                                    <label>Datenbank-Benutzername</label>
+                                    <input type="text" class="form-control" name="username_db" value=<%=username_db%>>
+                                </div>
+                                <div class="form-group">
+                                    <label>Datenbank-Passwort</label>
+                                    <input type="text" class="form-control" name="password_db" value=<%=password_db%>>
+                                </div>
+                                <div class="form-group">
+                                    <label>Datenbank-Name</label>
+                                    <input type="text" class="form-control" name="db" value=<%=db%>>
+                                </div>
+                                <br>
+                                <button type="submit" class="btn btn-primary btn-lg btn-block">Daten ändern</button>
+                            </form>
 
-                            <button type="submit" class="btn btn-warning btn-lg">Daten ändern</button>
-                        </form>
+                            <hr />
 
-                        <hr>
-
-                        <p>Zurück zur <a href="/profile">Übersicht</a></p>
+                            <p>Zurück zur <a href="/profile">Übersicht ></a></p>
+                        </div>
                     </div>
                 </div>
             </div>

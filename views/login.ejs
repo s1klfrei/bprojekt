@@ -2,45 +2,99 @@
 <html>
 <head>
     <title>BI App Dynamic Commerce</title>
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> <!-- load bootstrap css -->
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
     <style>
-        body        { padding-top:80px; }
+        /* Remove the navbar's default margin-bottom and rounded borders */
+        .navbar {
+          margin-bottom: 0;
+          border-radius: 0;
+          border-color: #97c33d;
+          background-color: white;
+        }
+
+        body {
+            background-color: white;
+        }
+
+        /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+        .row.content {height: 800px}
+
+        /* Set dc background color and 100% height; color before: f1f1f1*/
+        .sidenav {
+          padding-top: 20px;
+          background-color: #f1f1f1;
+          height: 100%;
+        }
+
+        .btn-primary {
+            background-color: #97c33d;
+            border-color: #97c33d;
+        }
+
+        .btn-primary:hover {
+            background-color: #74a80b;
+            border-color: #74a80b;
+        }
+
+        .btn-primary:focus {
+            background-color: #629102;
+            border-color: #629102;
+        }
     </style>
 </head>
 <body>
-<div class="container">
 
-<div class="col-sm-6 col-sm-offset-3">
-
-    <h1><span class="fa fa-sign-in"></span> Anmeldung</h1>
-    <br>
-    <!-- show any messages that come back with authentication -->
-    <% if (message.length > 0) { %>
-        <div class="alert alert-danger"><%= message %></div>
-    <% } %>
-
-    <!-- LOGIN FORM -->
-    <form action="/login" method="post">
-        <div class="form-group">
-            <label>Benutzername</label>
-            <input type="text" class="form-control" name="username">
+    <nav class="navbar navbar-light">
+      <div class="container-fluid">
+        <div class="navbar-header" id="myNavbarHeader">
+            <a href="/profile">
+                <img class="d-inline-block align-top" alt="dynamic commerce logo" src="https://www.dc-solution.de/userdata/images/allgemein/Logo-dynamic-commerce.svg" style="margin-top: 3px; width: 120px; height:45px;">
+            </a>
         </div>
-        <div class="form-group">
-            <label>Passwort</label>
-            <input type="password" class="form-control" name="password">
+        <span class="navbar-brand" style="margin-left: 20px; color: #97c33d;">Business Intelligence App</span>
+        <div class="collapse navbar-collapse" id="myNavbar">
+          <ul class="nav navbar-nav navbar-right">
+              <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> Ausloggen</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div>
+
+        <div class="col-sm-6 col-sm-offset-3">
+
+            <h1><span class="fa fa-sign-in"></span> Anmeldung</h1>
+            <br>
+            <!-- show any messages that come back with authentication -->
+            <% if (message.length > 0) { %>
+                <div class="alert alert-danger"><%= message %></div>
+            <% } %>
+
+            <!-- LOGIN FORM -->
+            <form action="/login" method="post">
+                <div class="form-group">
+                    <label>Benutzername</label>
+                    <input type="text" class="form-control" name="username">
+                </div>
+                <div class="form-group">
+                    <label>Passwort</label>
+                    <input type="password" class="form-control" name="password">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg btn-block">Anmelden</button>
+            </form>
+
+            <hr>
+
+            <p>Noch keinen Account? Nehmen Sie zu <a href="https://www.dc-solution.de/dc/de/kontakt/kontaktanfrage/">Dynamic Commerce</a> Kontakt auf</p>
+            <p>Zurück zur <a href="/">Startseite ></a></p>
+
         </div>
 
-        <button type="submit" class="btn btn-warning btn-lg">Anmelden</button>
-    </form>
-
-    <hr>
-
-    <p>Noch nicht registriert? <a href="/signup">Registrieren</a></p>
-    <p>Oder ab nach Hause. (<a href="/">Home</a>)</p>
-
-</div>
-
-</div>
+    </div>
 </body>
 </html>

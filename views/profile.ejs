@@ -15,21 +15,42 @@
         .navbar {
           margin-bottom: 0;
           border-radius: 0;
+          border-color: #97c33d;
+          background-color: white;
+        }
+
+        body {
+            background-color: white;
         }
 
         /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
         .row.content {height: 800px}
 
-        /* Set gray background color and 100% height */
+        /* Set dc background color and 100% height; color before: f1f1f1*/
         .sidenav {
           padding-top: 20px;
           background-color: #f1f1f1;
           height: 100%;
         }
 
+        .btn-primary {
+            background-color: #97c33d;
+            border-color: #97c33d;
+        }
+
+        .btn-primary:hover {
+            background-color: #74a80b;
+            border-color: #74a80b;
+        }
+
+        .btn-primary:focus {
+            background-color: #629102;
+            border-color: #629102;
+        }
+
         /* Set black background color, white text and some padding */
         footer {
-          background-color: #555;
+          background-color: #f1f1f1;
           color: white;
           padding: 15px;
         }
@@ -60,18 +81,21 @@
 
 <body>
 
-<nav class="navbar navbar-inverse">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <a class="navbar-brand" href="/profile">Business Intelligence App DC</a>
-    </div>
-    <div class="collapse navbar-collapse" id="myNavbar">
-      <ul class="nav navbar-nav navbar-right">
-          <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> Ausloggen</a></li>
-      </ul>
-    </div>
-  </div>
-</nav>
+    <nav class="navbar navbar-light">
+      <div class="container-fluid">
+        <div class="navbar-header" id="myNavbarHeader">
+            <a href="/profile">
+                <img class="d-inline-block align-top" alt="dynamic commerce logo" src="https://www.dc-solution.de/userdata/images/allgemein/Logo-dynamic-commerce.svg" style="margin-top: 3px; width: 120px; height:45px;">
+            </a>
+        </div>
+        <span class="navbar-brand" style="margin-left: 20px; color: #97c33d;">Business Intelligence App</span>
+        <div class="collapse navbar-collapse" id="myNavbar">
+          <ul class="nav navbar-nav navbar-right">
+              <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> Ausloggen</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
 
 
 
@@ -300,10 +324,8 @@
                     <div class="well">
                         <!-- Button um Diagramm von KPI 6 ein- & auszublenden -->
                         <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi6" data-toggle="collapse" type="button">Top Trending-Produkte der letzten 30 Tage</button>
-                        <!-- Diagramm KPI 6 -->
-                        <div id="chart_kpi6" class="collapse in" aria-expanded="false" style>
-                            <br>
-                            <!-- SELECT-Button -->
+                        <!-- SELECT-Button -->
+                        <span>
                             <select id="button_kpi6">
                                 <option>1</option>
                                 <option>2</option>
@@ -314,6 +336,10 @@
                                 <option>15</option>
                                 <option>20</option>
                             </select>
+                        </span>
+                        <!-- Diagramm KPI 6 -->
+                        <div id="chart_kpi6" class="collapse in" aria-expanded="false" style>
+
                             <!--***********************
                             Hier kommt das Diagramm für KPI 6 (Top 10 Trending-Produkte der letzten 30 Tage) hin
                             ************************-->

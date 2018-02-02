@@ -63,24 +63,6 @@
           }
           .row.content {height:auto;}
         }
-        /* Set Table-Style */
-        table {
-            font-family: arial, sans-serif;
-            border-collapse: collapse;
-            width: 100%;
-        }
-
-        td, th {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-        }
-
-        tr:nth-child(even) {
-            background-color: #dddddd;
-        }
-
-
     </style>
     <script type="text/javascript">
 
@@ -140,53 +122,53 @@
             <div class="row">
                 <div class="col-xs-12">
                     <div class="well">
-                        <!-- Zeige Flash-Message, wenn neuer Nutzer hinzugefügt wird -->
-                        <% if (addUserMessage.length > 0) { %>
-                            <div class="alert alert-success"><%= addUserMessage %></div>
-                        <% } %>
-                        <!-- Zeige Flash-Message, wenn ein Nutzer gelöscht wurde -->
-                        <% if (deleteUserMessage.length > 0) { %>
-                            <div class="alert alert-success"><%= deleteUserMessage %></div>
-                        <% } %>
-
-                        <form action="/addUser" method="get">
-                            <input type="submit" class="btn btn-default btn-lg btn-block" value="Neuen Benutzer hinzufügen (+)">
-                        </form>
-                        <br>
-
-                        <div class="list-group">
-
-                            <table style="width:100%" id="userTable">
-                              <tr>
-                                <th>Benutzername</th>
-                                <th>Host_KundenDB</th>
-                                <th>Benutzername_KundenDB</th>
-                                <th>Name_KundenDB</th>
-                              </tr>
-                              <%
-                              for(var i of userList) { %>
-                              <!-- Benutze bei i."X" den Nametag, den man in der Query der Spalte zuweist. -->
-                              <% var link = '/changeUser?username=' + i.username %>
-                              <tr class='clickable-row' data-href=<%=link%>>
-                                  <td><%=i.username%></td>
-                                  <td><%=i.host%></td>
-                                  <td><%=i.username_db%></td>
-                                  <td><%=i.db%></td>
-                              </tr><%
-                              }
-                              %>
-                            </table>
-
-                            <script type="text/javascript">
-
-                                jQuery(document).ready(function($) {
-                                    $(".clickable-row").click(function() {
-                                        window.location = $(this).data("href");
-                                    });
-                                });
-                            </script>
-
+                        <div>
+                            <h2 class="text-align-center">Fügen Sie einen neuen Nutzer hinzu:</h2>
+                            <hr />
                         </div>
+
+                        <!-- Zeige Flash-Message, wenn nicht alle Felder ausgefüllt wurden -->
+                        <% if (message.length > 0) { %>
+                            <div class="alert alert-danger"><%= message %></div>
+                        <% } %>
+
+                        <!-- INSERT FORM -->
+                        <form action="/addUser" method="post">
+                            <div class="form-group">
+                                <label>Benutzername</label>
+                                <input type="text" class="form-control" name="username">
+                            </div>
+                            <div class="form-group">
+                                <label>Passwort</label>
+                                <input type="password" class="form-control" name="password">
+                            </div>
+                            <div class="form-group">
+                                <label>Passwort bestätigen</label>
+                                <input type="password" class="form-control" name="passwordConfirm">
+                            </div>
+                            <div class="form-group">
+                                <label>Datenbank-Host</label>
+                                <input type="text" class="form-control" name="host">
+                            </div>
+                            <div class="form-group">
+                                <label>Datenbank-Benutzername</label>
+                                <input type="text" class="form-control" name="username_db">
+                            </div>
+                            <div class="form-group">
+                                <label>Datenbank-Passwort</label>
+                                <input type="text" class="form-control" name="password_db">
+                            </div>
+                            <div class="form-group">
+                                <label>Datenbank-Name</label>
+                                <input type="text" class="form-control" name="db">
+                            </div>
+                            <br>
+                            <button type="submit" class="btn btn-primary btn-lg btn-block">Benutzer hinzufügen ></button>
+                        </form>
+
+                        <hr />
+
+                        <p>Zurück zur <a href="/profile">Übersicht ></a></p>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,6 @@
 var mysql = require('mysql');
 var unquote = require('unquote');
+var passwordHash = require('password-hash');
 
 module.exports = function(app, passport, connectionLoginDB) {
 
@@ -29,29 +30,12 @@ module.exports = function(app, passport, connectionLoginDB) {
         failureRedirect : '/login', // redirect back to the signup page if there is an error
         failureFlash : true // allow flash messages
     }));
-
-
-    // =====================================
-    // SIGNUP ==============================
-    // =====================================
-    // show the signup form
-    app.get('/signup', function(req, res) {
-        // render the page and pass in any flash data if it exists
-        res.render('signup.ejs', { message: req.flash('signupMessage') });
-    });
-
-    // process the signup form
-    app.post('/signup', passport.authenticate('local-signup', {
-        successRedirect : '/profile', // redirect to the secure profile section
-        failureRedirect : '/signup', // redirect back to the signup page if there is an error
-        failureFlash : true // allow flash messages
-    }));
+    
 
     // =====================================
     // PROFILE SECTION =====================
     // =====================================
-    // we will want this protected so you have to be logged in to visit
-    // we will use route middleware to verify this (the isLoggedIn function)
+    // Geschützt durch isLoggedIn-Funktion
     app.get('/profile', isLoggedIn, function(req, res) {
 
         if (req.user.username == "admin") {
@@ -67,7 +51,9 @@ module.exports = function(app, passport, connectionLoginDB) {
                     users = results;
                 }
                 res.render('profile_admin.ejs', {
-                    userList    : users
+                    userList           : users,
+                    addUserMessage     : req.flash('addUserMessage'),
+                    deleteUserMessage  : req.flash('deleteUserMessage')
                 });
     		});
 
@@ -349,9 +335,10 @@ module.exports = function(app, passport, connectionLoginDB) {
 
 
     // =====================================
-    // ChangeUser (nur Admins) =============
+    // CHANGEUSER (nur Admins) =============
     // =====================================
-    app.get('/changeUser', function(req, res) {
+    // Geschützt durch isLoggedInAdmin-Funktion
+    app.get('/changeUser', isLoggedInAdmin, function(req, res) {
 
         var selectedUserData;
 
@@ -364,14 +351,161 @@ module.exports = function(app, passport, connectionLoginDB) {
                 res.render('changeUser.ejs', {
                     selectedUser    : req.query.username,
                     username        : unquote(JSON.stringify(selectedUserData[0].username)),
+                    password        : unquote(JSON.stringify(selectedUserData[0].password)),
                     host            : unquote(JSON.stringify(selectedUserData[0].host)),
                     username_db     : unquote(JSON.stringify(selectedUserData[0].username_db)),
                     password_db     : unquote(JSON.stringify(selectedUserData[0].password_db)),
-                    db              : unquote(JSON.stringify(selectedUserData[0].db))
+                    db              : unquote(JSON.stringify(selectedUserData[0].db)),
+                    message         : req.flash('changeUserMessage')
                 });
             }
         });
     });
+
+    app.post('/changeUser', function(req, res) {
+        // Wenn der Nutzer nur geändert werden soll, fahre fort
+        if (req.query.type === "change") {
+            var actualPassword;
+            // Hole aktuelles gehashtes Passwort
+            connectionLoginDB.query(' \
+                SELECT password \
+                FROM users \
+                WHERE username = "' + req.query.username + '"', function(err, results){
+                    if (err) {
+                        console.log('Admin: Fehler beim Auslesen der UserData zum Vergleich vom Passwort!', err);
+                    }
+                    else {
+                        actualPassword = results[0].password;
+                    }
+                // Checken, ob Passwort geändert wurde
+                // Wenn es nicht geändert wurde, hashe Passwort nicht nochmal und update das Passwort nicht
+                if (actualPassword === req.body.password && req.body.password === req.body.passwordConfirm) {
+                    connectionLoginDB.query(' \
+                        UPDATE users \
+                        SET username = "'+req.body.username+'", host = "'+req.body.host+'", username_db = "'+req.body.username_db+'", password_db = "'+req.body.password_db+'", db = "'+req.body.db+'" \
+                        WHERE username = "' + req.query.username + '"', function(err, results){
+                            if (err) {
+                                console.log('Admin: Fehler beim Updaten der UserData!', err);
+                            }
+                            else {
+                                // Zeige Seite erneut mit Success-Flash-Message
+                                req.flash('changeUserMessage', 'Die Daten wurden erfolgreich geändert.');
+                                res.redirect('/changeUser?username='+req.body.username);
+                            }
+                    });
+                }
+                // Mindestens eins der Passwort-Felder wurde geändert
+                else {
+                    // Wenn Passwort geändert wurde & zweimal identisch eingegeben wurde, hashe und update es in der DB
+                    if (req.body.password === req.body.passwordConfirm) {
+                        connectionLoginDB.query(' \
+                            UPDATE users \
+                            SET username = "'+req.body.username+'", password = "'+passwordHash.generate(req.body.password)+'", host = "'+req.body.host+'", username_db = "'+req.body.username_db+'", password_db = "'+req.body.password_db+'", db = "'+req.body.db+'" \
+                            WHERE username = "' + req.query.username + '"', function(err, results){
+                                if (err) {
+                                    console.log('Admin: Fehler beim Updaten der UserData!', err);
+                                }
+                                else {
+                                    // Zeige Seite erneut mit Success-Flash-Message an
+                                    req.flash('changeUserMessage', 'Die Daten wurden erfolgreich geändert.');
+                                    res.redirect('/changeUser?username='+req.body.username);
+                                }
+                        });
+                    }
+                    // Passwort wurde nicht identisch eingegeben, also zeige Failure-Flash-Message
+                    else {
+                        // Zeige Seite erneut mit Failure-Flash-Message an
+                        req.flash('changeUserMessage', 'Das Passwort stimmt nicht überein.');
+                        res.redirect('/changeUser?username='+req.body.username);
+                    }
+                }
+            });
+        }
+        // Wenn der Nutzer gelöscht werden soll, folgendes ausführen
+        else {
+            connectionLoginDB.query(' \
+                DELETE FROM users \
+                WHERE username = "' + req.query.username + '"', function(err, results){
+                    if (err) {
+                        console.log('Admin: Fehler beim Löschen des Benutzers!', err);
+                    }
+                    else {
+                        // Zeige Profile-Seite mit Success-Flash-Message an, falls erfolgreich gelöscht
+                        req.flash('deleteUserMessage', 'Der Nutzer "'+req.query.username+'" wurde erfolgreich aus der Datenbank entfernt.');
+                        res.redirect('/profile');
+                    }
+            });
+        }
+    });
+
+
+    // =====================================
+    // ADDUSER (nur Admins) =============
+    // =====================================
+    // Geschützt durch isLoggedInAdmin-Funktion
+    app.get('/addUser', isLoggedInAdmin, function(req, res) {
+
+        res.render('addUser.ejs', {
+            message     : req.flash('addUserMessage')
+        });
+
+    });
+
+    app.post('/addUser', function(req, res) {
+
+        // Checken, ob alle Felder ausgefüllt wurden und fahre fort, wenn ja
+        if (req.body.username.length > 0 && req.body.password.length > 0 && req.body.passwordConfirm.length > 0 && req.body.host.length > 0 && req.body.username_db.length > 0 && req.body.password_db.length > 0 && req.body.db.length > 0) {
+            // Checken, ob Benutzername schon in DB vorhanden
+            connectionLoginDB.query(' \
+                SELECT count(*) AS anzahlVorhandenderNutzer \
+                FROM users \
+                WHERE username = "'+req.body.username+'"',
+                function(err, results){
+                    if (err) {
+                        console.log('Admin: Fehler beim Checken, ob Benutzername schon in LoginDB vorhanden ist (Hinzufügen eines neuen Benutzers).', err);
+                    }
+                    else {
+                        // Wenn Benutzername noch verfügbar, dann fahre fort
+                        if (results[0].anzahlVorhandenderNutzer == 0) {
+                            // Wenn Passwort übereinstimmt, füge neuen Benutzer hinzu
+                            if (req.body.password === req.body.passwordConfirm) {
+                                connectionLoginDB.query(' \
+                                    INSERT INTO users \
+                                    (`username`, `password`, `host`, `username_db`, `password_db`, `db`) VALUES \
+                                    ("'+req.body.username+'","'+passwordHash.generate(req.body.password)+'", "'+req.body.host+'", "'+req.body.username_db+'", "'+req.body.password_db+'", "'+req.body.db+'")',
+                                    function(err, results){
+                                        if (err) {
+                                            console.log('Admin: Fehler beim Hinzufügen eines neuen Benutzers zu der LoginDB.', err);
+                                        }
+                                        else {
+                                            // Zeige Profile-Seite mit Success-Flash-Message
+                                            req.flash('addUserMessage', 'Der neue Benutzer "'+req.body.username+'" wurde erfolgreich hinzugefügt.');
+                                            res.redirect('/profile');
+                                        }
+                                });
+                            }
+                            // Wenn Passwörter nicht übereinstimmen, dann zeige AddUser-Seite erneut mit Failure-Flash-Message an
+                            else {
+                                req.flash('addUserMessage', 'Die Passwörter stimmen nicht überein.');
+                                res.redirect('/addUser');
+                            }
+                        }
+                        // Wenn Benutzername schon vorhanden, dann zeige AddUser-Seite erneut mit Failure-Flash-Message an
+                        else {
+                            req.flash('addUserMessage', 'Der Benutzername ist leider schon vergeben.');
+                            res.redirect('/addUser');
+                        }
+                    }
+            });
+        }
+        // Wenn nicht alle Felder ausgefüllt wurden, Failure-Message anzeigen
+        else {
+            req.flash('addUserMessage', 'Es wurden nicht alle Felder ausgefüllt.');
+            res.redirect('/addUser');
+        }
+
+    });
+
 
     // =====================================
     // LOGOUT ==============================
@@ -394,4 +528,15 @@ function isLoggedIn(req, res, next) {
 
     // if they aren't redirect them to the home page
     res.redirect('/');
+}
+
+// route middleware to make sure an admin is logged in
+function isLoggedInAdmin(req, res, next) {
+
+    // if user is authenticated in the session, carry on
+    if (req.isAuthenticated() && req.user.username == "admin")
+        return next();
+
+    // if they aren't redirect them to the home page
+    res.redirect('/profile');
 }
