@@ -142,7 +142,6 @@
                                 $("#button_kpi1").change(function() {
                                     console.log("-.-.-.-.-.-Button wurde geaendert: " + $(this).val());
                                     $.get("?year=" + $(this).val(), function(data, status) {
-
                                   })
                                 });
                             </script>
@@ -188,6 +187,7 @@
                                 var data4 = <%-JSON.stringify(result4_2)%>;
                                 var chart4 = new dimple.chart(svg4, data4);
                                 var x4 = chart4.addCategoryAxis("x", "monat");
+                                x4.addOrderRule("monat");
                                 x4.title = "Monat";
                                 var y4 = chart4.addMeasureAxis("y", "umsatz");
                                 y4.title = "Umsatz (€)";
@@ -217,6 +217,7 @@
                                 var data5 = <%-JSON.stringify(result5)%>
                                 var chart5 = new dimple.chart(svg5, data5);
                                 var x5 = chart5.addCategoryAxis("x", "monat");
+                                x5.addOrderRule("monat");
                                 x5.title = "Monat";
                                 var y5 = chart5.addMeasureAxis("y", "avg_bestellsumme");
                                 y5.title = "Durchschnittliche Bestellsumme (€)";
@@ -276,7 +277,8 @@
                                 //	     ];
 
                                 var chart6 = new dimple.chart(svg6, data6);
-                                chart6.addCategoryAxis("x", ["Monat", "Art"]);
+                                var x6 = chart6.addCategoryAxis("x", ["Monat", "Art"]);
+                                x6.addOrderRule("Monat");
                                 chart6.addMeasureAxis("y", "Anzahl");
                                 chart6.addSeries("Art", dimple.plot.bar);
                                 chart6.addLegend("80%", 10, "10%", "95%", "right");
@@ -327,14 +329,14 @@
                         <!-- SELECT-Button -->
                         <span>
                             <select id="button_kpi6">
-                                <option>1</option>
-                                <option>2</option>
-                                <option>3</option>
-                                <option>4</option>
-                                <option>5</option>
-                                <option>10</option>
-                                <option>15</option>
-                                <option>20</option>
+                                <option <% if (numberTopProducts == 1) %>selected<% ; %>>1</option>
+                                <option <% if (numberTopProducts == 2) %>selected<% ; %>>2</option>
+                                <option <% if (numberTopProducts == 3) %>selected<% ; %>>3</option>
+                                <option <% if (numberTopProducts == 4) %>selected<% ; %>>4</option>
+                                <option <% if (numberTopProducts == 5) %>selected<% ; %>>5</option>
+                                <option <% if (numberTopProducts == 10) %>selected<% ; %>>10</option>
+                                <option <% if (numberTopProducts == 15) %>selected<% ; %>>15</option>
+                                <option <% if (numberTopProducts == 20) %>selected<% ; %>>20</option>
                             </select>
                         </span>
                         <!-- Diagramm KPI 6 -->
@@ -344,16 +346,20 @@
                             Hier kommt das Diagramm für KPI 6 (Top 10 Trending-Produkte der letzten 30 Tage) hin
                             ************************-->
                             <script>
-                                // Send GET-Request when SELECT-Button changes
-                                $("#button_kpi6").change(function() {
-                                        console.log("-.-.-.-.-.-Button wurde geaendert: " + $(this).val());
-                                        $.get("?numberTopProducts=" + $(this).val(), function(data, status) {})
-                                });
                                 //
                                 // TO-DO: letzte 30 Tage von aktuellem Datum aus
                                 //
                                 // KPI-Diagramm Top 10 Trending-Produkte im Monat vor dem 20.3.2017
                                 //
+                                // Send GET-Request when SELECT-Button changes
+                                $("#button_kpi6").change(function() {
+                                        console.log("-.-.-.-.-.-Button wurde geaendert: " + $(this).val());
+                                        window.location.replace("?numberTopProducts=" + $(this).val());
+                                        /*$.get("?numberTopProducts=" + $(this).val(), function(data, status) {
+                                            data9 = <%-JSON.stringify(result9)%>;
+                                            console.log(<%-JSON.stringify(result9)%>);
+                                        })*/
+                                });
                                 var svg9 = dimple.newSvg("#chart_kpi6", "100%", 350);
                                 var data9 = <%-JSON.stringify(result9)%>;
                                 var chart9 = new dimple.chart(svg9, data9);

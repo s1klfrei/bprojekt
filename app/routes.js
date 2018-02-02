@@ -7,6 +7,24 @@ module.exports = function(app, passport, connectionLoginDB) {
     // Wichtig für Synchronisierung der DB-Anfragen
     var deasync = require('deasync');
 
+    // Setup der verschiedenen KPI-Ergebnisse
+    var kpis = require('./kpi_queries.js');
+    // var years = kpis.getYearsData(connectionCustomerDB),
+    //     kpi1_1 = kpis.getKpiUmsatzProJahr(connectionCustomerDB),
+    //     kpi1_2 = kpis.getKpiUmsatzProMonat(connectionCustomerDB);
+    var kpi1_1,
+        years,
+        selectedYear,
+        kpi1_2,
+        kpi2,
+        kpi3,
+        kpi4,
+        kpi5_1,
+        kpi5_2,
+        kpi6,
+        numberTopProducts
+        ;
+
     // =====================================
     // HOME PAGE (with login links) ========
     // =====================================
@@ -30,7 +48,7 @@ module.exports = function(app, passport, connectionLoginDB) {
         failureRedirect : '/login', // redirect back to the signup page if there is an error
         failureFlash : true // allow flash messages
     }));
-    
+
 
     // =====================================
     // PROFILE SECTION =====================
@@ -38,6 +56,7 @@ module.exports = function(app, passport, connectionLoginDB) {
     // Geschützt durch isLoggedIn-Funktion
     app.get('/profile', isLoggedIn, function(req, res) {
 
+        // Wenn der Admin daruaf zugreift, leite ihn zur profileAdmin-Seite weiter
         if (req.user.username == "admin") {
 
             var users;
@@ -58,7 +77,9 @@ module.exports = function(app, passport, connectionLoginDB) {
     		});
 
 
-        } else {
+        }
+        // Wenn normaler User, fahre fort
+        else {
 
                 console.log("================== Profile-Seite wird aufgerufen =================");
 
@@ -90,27 +111,6 @@ module.exports = function(app, passport, connectionLoginDB) {
                     //
                     // ***************************************************************
                     // ***************************************************************
-
-                    // Setup der verschiedenen KPI-Ergebnisse
-                    var kpis = require('./kpi_queries.js');
-                    // var years = kpis.getYearsData(connectionCustomerDB),
-                    //     kpi1_1 = kpis.getKpiUmsatzProJahr(connectionCustomerDB),
-                    //     kpi1_2 = kpis.getKpiUmsatzProMonat(connectionCustomerDB);
-                    var kpi1_1,
-                        years,
-                        selectedYear,
-                        kpi1_2,
-                        kpi2,
-                        kpi3,
-                        kpi4,
-                        kpi5_1,
-                        kpi5_2,
-                        kpi6,
-                        numberTopProducts
-                        ;
-
-                    if (numberTopProducts === undefined) numberTopProducts = 10;
-                    // else numberTopProducts = req.query.numberTopProducts;
 
 
 
@@ -248,7 +248,7 @@ module.exports = function(app, passport, connectionLoginDB) {
                     // RETURN: Wert als Zahl
                     connectionCustomerDB.query(
                         'SELECT ROUND((AVG(item_total_add_to_basket_value) - AVG(item_total_rm_from_basket_value)),2) AS avg_wk \
-                        FROM customer3.visitor',
+                        FROM visitor',
                     	function(err, results) {
                             if (!err){
                                 kpi5_1 = JSON.stringify(results[0].avg_wk);
@@ -285,49 +285,79 @@ module.exports = function(app, passport, connectionLoginDB) {
 
                     // KPI 6: Top X Trending-Produkte der letzten 30 Tage --> TODO: aktuelles Datum: "2017-03-20" an 2 Stellen durch CURDATE() ersetzen
                     // RETURN: JSON mit 10 Produkten
-                    connectionCustomerDB.query(
-                        'SELECT vi.item_id, i.description AS description, SUM(vi.total_order_value) AS umsatz \
-                        FROM    ( \
-                                SELECT visitor_id as vid \
-                                FROM tracking_events \
-                                WHERE event_type = "ORDER_COMPLETE" AND DATEDIFF("2017-03-20",FROM_UNIXTIME(creation_timestamp)) < 31 AND DATEDIFF("2017-03-20",FROM_UNIXTIME(creation_timestamp)) >= 0 \
-                                ) o, visitor_item vi, item i \
-                        WHERE o.vid = vi.visitor_id AND vi.item_id = i.id \
-                        GROUP BY vi.item_id \
-                        ORDER BY SUM(vi.total_order_value) DESC \
-                        LIMIT ' + numberTopProducts,
-                        function(err, results) {
-                            if (!err){
-                                kpi6 = results;
+                    // Rufe Query standardmäßig mit 10 Produkten auf
+                    if (numberTopProducts === undefined || req.query.numberTopProducts === undefined) {
+                        numberTopProducts = 10;
+                        connectionCustomerDB.query(
+                            'SELECT vi.item_id, i.description AS description, SUM(vi.total_order_value) AS umsatz \
+                            FROM    ( \
+                                    SELECT visitor_id as vid \
+                                    FROM tracking_events \
+                                    WHERE event_type = "ORDER_COMPLETE" AND DATEDIFF("2017-03-20",FROM_UNIXTIME(creation_timestamp)) < 31 AND DATEDIFF("2017-03-20",FROM_UNIXTIME(creation_timestamp)) >= 0 \
+                                    ) o, visitor_item vi, item i \
+                            WHERE o.vid = vi.visitor_id AND vi.item_id = i.id \
+                            GROUP BY vi.item_id \
+                            ORDER BY SUM(vi.total_order_value) DESC \
+                            LIMIT ' + numberTopProducts,
+                            function(err, results) {
+                                if (!err){
+
+                                    kpi6 = results;
+
+                                }
+                                else {
+                                    console.log('Error while performing Query KPI 6 (Top 10 Trending-Produkte der letzten 30 Tage).', err);
+                                }
                             }
-                            else{
-                                console.log('Error while performing Query KPI 6 (Top Trending-Produkte der letzten 30 Tage.', err);
+                        );
+                    }
+                    // Rufe Query mit X Produkten auf, falls auf Webseite Button geändert wurde
+                    else {
+                        numberTopProducts = req.query.numberTopProducts;
+                        kpi6 = undefined;
+                        console.log("______________________: " + numberTopProducts);
+                        connectionCustomerDB.query(
+                            'SELECT vi.item_id, i.description AS description, SUM(vi.total_order_value) AS umsatz \
+                            FROM    ( \
+                                    SELECT visitor_id as vid \
+                                    FROM tracking_events \
+                                    WHERE event_type = "ORDER_COMPLETE" AND DATEDIFF("2017-03-20",FROM_UNIXTIME(creation_timestamp)) < 31 AND DATEDIFF("2017-03-20",FROM_UNIXTIME(creation_timestamp)) >= 0 \
+                                    ) o, visitor_item vi, item i \
+                            WHERE o.vid = vi.visitor_id AND vi.item_id = i.id \
+                            GROUP BY vi.item_id \
+                            ORDER BY SUM(vi.total_order_value) DESC \
+                            LIMIT ' + numberTopProducts,
+                            function(err, results) {
+                                if (!err){
+                                    kpi6 = results;
+                                    console.log("result9: " + kpi6);
+                                }
+                                else {
+                                    console.log('Error while performing Query KPI 6 (Top X Trending-Produkte der letzten 30 Tage).', err);
+                                }
                             }
-                        }
-                    );
+                        );
+                    }
 
 
-
-
-                    while (years === undefined || kpi1_1 === undefined || kpi1_2 === undefined || kpi2 === undefined || kpi3 === undefined || kpi4 === undefined || kpi5_1 === undefined || kpi5_2 === undefined || kpi6 === undefined) {
+                    while (years === undefined || kpi1_1 === undefined || kpi1_2 === undefined || kpi2 === undefined || kpi3 === undefined || kpi4 === undefined || kpi5_1 === undefined || kpi5_2 === undefined || kpi6 === undefined || numberTopProducts === undefined) {
                     	deasync.runLoopOnce();
                     }
 
 
             		res.render('profile.ejs', {
-                        user        : req.user.username,
-                        years_kpi1  : years,
-                        result4_1   : kpi1_1,
-                        result4_2   : kpi1_2,
-                        result5     : kpi2,
-                        result6     : kpi3,
-                        result7     : kpi4,
-                        result8_1   : kpi5_1,
-                        result8_2   : kpi5_2,
-                        result9     : kpi6
+                        user                : req.user.username,
+                        years_kpi1          : years,
+                        result4_1           : kpi1_1,
+                        result4_2           : kpi1_2,
+                        result5             : kpi2,
+                        result6             : kpi3,
+                        result7             : kpi4,
+                        result8_1           : kpi5_1,
+                        result8_2           : kpi5_2,
+                        result9             : kpi6,
+                        numberTopProducts   : numberTopProducts
                     });
-
-                    console.log("******" + req.query.year + "--" + req.query.numberTopProducts);
 
                 });
         }
