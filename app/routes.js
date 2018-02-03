@@ -305,11 +305,10 @@ module.exports = function(app, passport, connectionLoginDB) {
                         }
                     );
 
-                    // Setze numberTopProducts auf ausgewählten Wert
-                    numberTopProducts = req.query.numberTopProducts;
-
                     // KPI 6: Top X BESTSELLER
                     // RETURN: JSON mit 10 Produkten
+                    // Setze numberTopProducts auf ausgewählten Wert
+                    numberTopProducts = req.query.numberTopProducts;
                     // Rufe Query standardmäßig mit 10 Produkten auf, wenn nichts ausgewählt wurde
                     if (numberTopProducts === undefined) {
                         numberTopProducts = 10;
