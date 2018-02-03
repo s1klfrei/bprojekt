@@ -56,6 +56,7 @@ app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
 
 // routes ======================================================================
+require('./sql_queries/kpi_queries.js')(connectionLoginDB);
 require('./app/routes.js')(app, passport, connectionLoginDB); // load our routes and pass in our app and fully configured passport
 
 // launch ======================================================================

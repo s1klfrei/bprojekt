@@ -126,8 +126,7 @@
                         <h3 class="text-center">Gesamtumsatz im Jahr &nbsp;
                                 <!-- Auswahl-Button für parametrisierbares Jahr von KPI1 (UmsatzProMonat) -->
                                 <select id="button_kpi1">
-                                    <% console.log(years_kpi1);
-                                    for(var i of years_kpi1) { %>
+                                    <% for(var i of years_kpi1) { %>
                                     <!-- Benutze bei i."year" den Nametag, den man in der Query der Spalte zuweist. -->
                                     <option><%=i.year%></option><%
                                     }
@@ -154,9 +153,9 @@
                     <div class="well">
                         <!-- KPI 5: Warenkorb- und Bestell-Daten und -->
                         <!-- ************** TO-DO: Info-Button hinzufügen, wo man die Erklärung für die Werte erhält ********** -->
-                        <p class="text-left">Durchschnittlicher Warenkorbwert: <strong><%=result8_1%>€</strong></p>
-                        <p class="text-left">Durchschnittliche Bestellsumme: <strong><%=result8_3%>€</strong></p>
-                		<p class="text-left">Rate nicht-bestellter Warenkörbe: <strong><%=result8_2%>%</strong></p>
+                        <p class="text-left">Durchschnittlicher Warenkorbwert: <strong><%-JSON.stringify(result8_1[0].avg_wk)%>€</strong></p>
+                        <p class="text-left">Durchschnittliche Bestellsumme: <strong><%-JSON.stringify(result8_3[0].Bestellsumme_AVG)%>€</strong></p>
+                		<p class="text-left">Rate nicht-bestellter Warenkörbe: <strong><%-JSON.stringify(result8_2[0].rate_n_wk)%>%</strong></p>
                     </div>
                 </div>
 
@@ -208,7 +207,6 @@
 
                     </div>
                 </div>
-
                 <!-- Rechtes Feld in Reihe 1 -->
                 <div class="col-lg-6">
                     <div class="well">
@@ -249,11 +247,11 @@
                 <div class="col-lg-6">
                     <div class="well">
                         <!-- Button um Diagramm von KPI 6 ein- & auszublenden -->
-                        <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi6" data-toggle="collapse" type="button">Top Trending-Produkte der letzten 30 Tage</button>
+                        <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi6" data-toggle="collapse" type="button">Bestseller</button>
                         <!-- SELECT-Button -->
                         <span>
                             <select id="button_kpi6">
-                                <% if (numberTopProducts == 1) %>selected<% ; %>
+                                <!-- TO-DO: selected aktualisieren -->
                                 <option>1</option>
                                 <option>2</option>
                                 <option>3</option>
@@ -293,7 +291,7 @@
                                 y9.title = "Item";
                                 y9.hidden = true;
                                 var x9 = chart9.addMeasureAxis("x", "Anzahl");
-                                x9.title = "Anzahl der bestellten Produkte";
+                                x9.title = "Anzahl an Bestellungen des Produkts";
                                 var s9 = chart9.addSeries(null, dimple.plot.bar);
                                 s9.afterDraw = function (shape, data) {
                                     var s = d3.select(shape),
@@ -348,7 +346,6 @@
                                     data6.push(obj1);
                                     data6.push(obj2);
                                 }
-                                console.log(data6);
                                 // so sieht die Eingabe für das Diagramm aus:
                                 //	     var data6 = [
                                 //	 	    {"Monat": "1", "Art": "Orders", "Anzahl": "10"},
@@ -387,9 +384,9 @@
                         <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi4" data-toggle="collapse" type="button">XXXXXXXX anzeigen</button>
                         <!-- KPI 5: Warenkörbe-Daten -->
                         <!-- ************** TO-DO: Info-Button hinzufügen, wo man die Erklärung für die Werte erhält ********** -->
-                        <p class="text-left">Durchschnittliche Zeit auf Seite: <strong><%=result10_1%> Sekunden</strong></p>
-                        <p class="text-left">Durchschnittliche Zeit bis zum Kauf: ca. <strong><%=result10_2%> Minuten</strong></p>
-                        <p class="text-left" style="text; color: #afafaf;"><small>Basierend auf Werten von <%=result10_3%>% der Besucher (Restliche erlauben kein Tracking)</small></p>
+                        <p class="text-left">Durchschnittliche Zeit auf Seite: <strong><%-JSON.stringify(result10_1[0].average_page_view_time)%> Sekunden</strong></p>
+                        <p class="text-left">Durchschnittliche Zeit bis zum Kauf: ca. <strong><%-JSON.stringify(result10_2[0].durchschnittliche_zeit_bis_kauf)%> Minuten</strong></p>
+                        <p class="text-left" style="text; color: #afafaf;"><small>Basierend auf Werten von <%-JSON.stringify(result10_3[0].ratio_js_users)%>% der Besucher (Restliche erlauben kein Tracking)</small></p>
 
                         <script>
                             //

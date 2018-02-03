@@ -8,22 +8,19 @@ module.exports = function(app, passport, connectionLoginDB) {
     var deasync = require('deasync');
 
     // Setup der verschiedenen KPI-Ergebnisse
-    var kpis = require('./kpi_queries.js');
-    // var years = kpis.getYearsData(connectionCustomerDB),
-    //     kpi1_1 = kpis.getKpiUmsatzProJahr(connectionCustomerDB),
-    //     kpi1_2 = kpis.getKpiUmsatzProMonat(connectionCustomerDB);
+
     var kpi1_1,
         years,
         selectedYear,
         leastSelectedYear,
         kpi1_2,
         kpi2,
-        kpi3,
+        kpi3, // nach jahr beliebigem jahr noch selecten!!!
         kpi4,
         kpi5_1,
         kpi5_2,
         kpi5_3,
-        kpi6,
+        kpi6 = [],
         kpi7_1,
         kpi7_2,
         kpi7_3,
@@ -65,7 +62,6 @@ module.exports = function(app, passport, connectionLoginDB) {
         if (req.user.username == "admin") {
 
             var users;
-            console.log("================== Admin-Profile-Seite wird aufgerufen =================");
             connectionLoginDB.query('SELECT * FROM `users` WHERE username != "admin"', function(err, results){
     			if (err) {
                     console.log('Admin: Fehler beim Abfragen der UserList!', err);
@@ -85,8 +81,6 @@ module.exports = function(app, passport, connectionLoginDB) {
         }
         // Wenn normaler User, fahre fort
         else {
-
-                console.log("================== Profile-Seite wird aufgerufen =================");
 
         		var connectionCustomerDB;
 
@@ -196,240 +190,243 @@ module.exports = function(app, passport, connectionLoginDB) {
 
                     // KPI 3: Conversionrate in absoluten Zahlen pro Monat
                     // RETURN: JSON mit Monate und Conversionrate pro Monat (bis zu 12 Werte-Paare)
-                    connectionCustomerDB.query(
-                        'SELECT o.monat, o.anzahl_orders, v.anzahl_visitor, \
-                        FROM    ( \
-                                SELECT COUNT(*) AS anzahl_orders, \
-                                DATE_FORMAT(FROM_UNIXTIME(creation_timestamp), "%m/%Y") AS monat \
-                                FROM tracking_events \
-            					WHERE event_type = "ORDER_COMPLETE" \
-                                GROUP BY DATE_FORMAT(FROM_UNIXTIME(creation_timestamp), "%m/%Y") \
-                                ORDER BY ANY_VALUE(FROM_UNIXTIME(creation_timestamp)) DESC \
-                                ) o, \
-                                ( \
-                                SELECT COUNT(*) AS anzahl_visitor, DATE_FORMAT(session_date, "%m/%Y") AS monat \
-                                FROM visitor \
-                                GROUP BY DATE_FORMAT(session_date, "%m/%Y") \
-                                ORDER BY ANY_VALUE(session_date) DESC \
-                                ) v \
-                        WHERE o.monat = v.monat;',
-                        function(err, results) {
-                            if (!err){
-                                kpi3 = results;
-                            }
-                            else{
-                				console.log('Error while performing Query KPI 3 (Conversionrate pro Monat).', err);
-                            }
-                        }
-                    );
+                    // connectionCustomerDB.query(
+                    //     'SELECT o.monat, o.anzahl_orders, v.anzahl_visitor, \
+                    //     FROM    ( \
+                    //             SELECT COUNT(*) AS anzahl_orders, \
+                    //             DATE_FORMAT(FROM_UNIXTIME(creation_timestamp), "%m/%Y") AS monat \
+                    //             FROM tracking_events \
+            		// 			WHERE event_type = "ORDER_COMPLETE" \
+                    //             GROUP BY DATE_FORMAT(FROM_UNIXTIME(creation_timestamp), "%m/%Y") \
+                    //             ORDER BY ANY_VALUE(FROM_UNIXTIME(creation_timestamp)) DESC \
+                    //             ) o, \
+                    //             ( \
+                    //             SELECT COUNT(*) AS anzahl_visitor, DATE_FORMAT(session_date, "%m/%Y") AS monat \
+                    //             FROM visitor \
+                    //             GROUP BY DATE_FORMAT(session_date, "%m/%Y") \
+                    //             ORDER BY ANY_VALUE(session_date) DESC \
+                    //             ) v \
+                    //     WHERE o.monat = v.monat',
+                    //     function(err, results) {
+                    //         if (!err){
+                    //             kpi3 = results;
+                    //         }
+                    //         else{
+                	// 			console.log('Error while performing Query KPI 3 (Conversionrate pro Monat).', err);
+                    //         }
+                    //     }
+                    // );
 
                     // KPI 4: Umsatz pro Stunde
                     // RETURN: JSON mit Stunden und jeweiligem Gesamtumsatz (bis zu 24 Werte-Paare)
-                    connectionCustomerDB.query(
-                        'SELECT a.stunde AS stunde, (a.umsatzProStunde / b.gesamtumsatz * 100) AS umsatz \
-                        FROM    ( \
-                                SELECT HOUR(session_date) as stunde, SUM(item_total_order_value) AS umsatzProStunde \
-                                FROM visitor \
-                                GROUP BY HOUR(session_date) \
-                                ) a, \
-                                ( \
-                                SELECT SUM(item_total_order_value) AS gesamtumsatz \
-                                FROM visitor \
-                                ) b',
-                        function(err, results) {
-                            if (!err){
-                                kpi4 = results;
-                            }
-                            else {
-                                console.log('Error while performing Query KPI 4 (Umsatz pro Stunde).', err);
-                            }
-                        }
-                    );
+                    // connectionCustomerDB.query(
+                        // 'SELECT a.stunde AS stunde, (a.umsatzProStunde / b.gesamtumsatz * 100) AS umsatz \
+                        // FROM    ( \
+                                // SELECT HOUR(session_date) as stunde, SUM(item_total_order_value) AS umsatzProStunde \
+                                // FROM visitor \
+                                // GROUP BY HOUR(session_date) \
+                                // ) a, \
+                                // ( \
+                                // SELECT SUM(item_total_order_value) AS gesamtumsatz \
+                                // FROM visitor \
+                                // ) b',
+                        // function(err, results) {
+                            // if (!err){
+                                // kpi4 = results;
+                            // }
+                            // else {
+                                // console.log('Error while performing Query KPI 4 (Umsatz pro Stunde).', err);
+                            // }
+                        // }
+                    // );
 
                     // KPI 5_1: Durchschnittlicher Wert der Warenkörbe
                     // RETURN: Wert als Zahl gerundet auf 2 Nachkommastellen
-                    connectionCustomerDB.query(
-                        'SELECT ROUND((AVG(item_total_add_to_basket_value) - AVG(item_total_rm_from_basket_value)),2) AS avg_wk \
-                        FROM visitor \
-                        WHERE item_total_add_to_basket_value > 0',
-                    	function(err, results) {
-                            if (!err){
-                                kpi5_1 = JSON.stringify(results[0].avg_wk);
-                            }
-                            else {
-                                console.log('Error while performing Query KPI 5_1 (Durchschnittlicher Wert der Warenkörbe).', err);
-                            }
-                        }
-                    );
+                    // connectionCustomerDB.query(
+                        // 'SELECT ROUND((AVG(item_total_add_to_basket_value) - AVG(item_total_rm_from_basket_value)),2) AS avg_wk \
+                        // FROM visitor \
+                        // WHERE item_total_add_to_basket_value > 0',
+                    	// function(err, results) {
+                            // if (!err){
+                                // kpi5_1 = JSON.stringify(results[0].avg_wk);
+                            // }
+                            // else {
+                                // console.log('Error while performing Query KPI 5_1 (Durchschnittlicher Wert der Warenkörbe).', err);
+                            // }
+                        // }
+                    // );
 
                     // KPI 5_2: Rate nicht-bestellter Warenkörbe
                     // RETURN: Wert als Zahl gerundet auf 1 Nachkommastelle
-        			connectionCustomerDB.query(
-                        'SELECT ROUND((1 - ordered.ANZAHL_BESTELLTER_WARENKOERBE / hinzugefuegt.ANZAHL_HINZUGEFUEGTER_WARENKOERBE),3)*100 AS rate_n_wk \
-                        FROM    ( \
-                                SELECT COUNT(DISTINCT session_id) AS ANZAHL_BESTELLTER_WARENKOERBE \
-                                FROM tracking_events \
-                                WHERE event_type = "ORDER_COMPLETE" \
-                                ) ordered, \
-                                ( \
-                                SELECT COUNT(DISTINCT session_id) AS ANZAHL_HINZUGEFUEGTER_WARENKOERBE \
-                                FROM tracking_events \
-                                WHERE event_type = "BASKET_ADD" \
-                                ) hinzugefuegt',
-        				function(err, results) {
-                            if (!err){
-                                kpi5_2 = JSON.stringify(results[0].rate_n_wk);
-                            }
-                            else{
-                                console.log('Error while performing Query KPI 5_2 (Rate nicht-bestellter Warenkörbe).', err);
-                            }
-                        }
-                    );
+        			// connectionCustomerDB.query(
+                        // 'SELECT ROUND((1 - ordered.ANZAHL_BESTELLTER_WARENKOERBE / hinzugefuegt.ANZAHL_HINZUGEFUEGTER_WARENKOERBE),3)*100 AS rate_n_wk \
+                        // FROM    ( \
+                                // SELECT COUNT(DISTINCT session_id) AS ANZAHL_BESTELLTER_WARENKOERBE \
+                                // FROM tracking_events \
+                                // WHERE event_type = "ORDER_COMPLETE" \
+                                // ) ordered, \
+                                // ( \
+                                // SELECT COUNT(DISTINCT session_id) AS ANZAHL_HINZUGEFUEGTER_WARENKOERBE \
+                                // FROM tracking_events \
+                                // WHERE event_type = "BASKET_ADD" \
+                                // ) hinzugefuegt',
+        				// function(err, results) {
+                            // if (!err){
+                                // kpi5_2 = JSON.stringify(results[0].rate_n_wk);
+                            // }
+                            // else{
+                                // console.log('Error while performing Query KPI 5_2 (Rate nicht-bestellter Warenkörbe).', err);
+                            // }
+                        // }
+                    // );
 
                     // KPI 5_3: Durchschnittliche Bestellsumme
                     // RETURN: Wert als Zahl gerundet auf 2 Nachkommastellen
-                    connectionCustomerDB.query(
-                        'SELECT ROUND(AVG(a.item_total_order_value), 2) AS Bestellsumme_AVG \
-                        FROM    ( \
-                                SELECT item_total_order_value \
-                                FROM visitor \
-                                WHERE item_total_order_value > 0 \
-                                ) a',
-            			function(err, results) {
-                    		if (!err){
-                                kpi5_3 = JSON.stringify(results[0].Bestellsumme_AVG);
-                    		}
-                			else {
-                                console.log('Error while performing Query KPI 5_3 (Durchschnittliche Bestellsumme).', err);
-                			}
-                        }
-                    );
+                    // connectionCustomerDB.query(
+                        // 'SELECT ROUND(AVG(a.item_total_order_value), 2) AS Bestellsumme_AVG \
+                        // FROM    ( \
+                                // SELECT item_total_order_value \
+                                // FROM visitor \
+                                // WHERE item_total_order_value > 0 \
+                                // ) a',
+            			// function(err, results) {
+                    		// if (!err){
+                                // kpi5_3 = JSON.stringify(results[0].Bestellsumme_AVG);
+                    		// }
+                			// else {
+                                // console.log('Error while performing Query KPI 5_3 (Durchschnittliche Bestellsumme).', err);
+                			// }
+                        // }
+                    // );
 
-                    // KPI 6: Top X BESTSELLER
-                    // RETURN: JSON mit 10 Produkten
                     // Setze numberTopProducts auf ausgewählten Wert
                     numberTopProducts = req.query.numberTopProducts;
+					if (numberTopProducts === undefined) {
+						numberTopProducts = 10;
+					}
+                    // KPI 6: Top X BESTSELLER
+                    // RETURN: JSON mit 10 Produkten
                     // Rufe Query standardmäßig mit 10 Produkten auf, wenn nichts ausgewählt wurde
-                    if (numberTopProducts === undefined) {
-                        numberTopProducts = 10;
-                        connectionCustomerDB.query(
-                            'SELECT vi.item_id, i.description AS Beschreibung, SUM(vi.total_order_qty) AS Anzahl \
-                            FROM    ( \
-                                    SELECT visitor_id as vid \
-                                    FROM tracking_events \
-                                    WHERE event_type = "ORDER_COMPLETE" \
-                                    ) o, visitor_item vi, item i \
-                            WHERE o.vid = vi.visitor_id AND vi.item_id = i.id \
-                            GROUP BY vi.item_id \
-                            ORDER BY SUM(vi.total_order_qty) DESC \
-                            LIMIT ' + numberTopProducts,
-                            function(err, results) {
-                                if (!err){
+                    // if (numberTopProducts === undefined) {
+                        // numberTopProducts = 10;
+                        // connectionCustomerDB.query(
+                            // 'SELECT vi.item_id, i.description AS Beschreibung, SUM(vi.total_order_qty) AS Anzahl \
+                            // FROM    ( \
+                                    // SELECT visitor_id as vid \
+                                    // FROM tracking_events \
+                                    // WHERE event_type = "ORDER_COMPLETE" \
+                                    // ) o, visitor_item vi, item i \
+                            // WHERE o.vid = vi.visitor_id AND vi.item_id = i.id \
+                            // GROUP BY vi.item_id \
+                            // ORDER BY SUM(vi.total_order_qty) DESC \
+                            // LIMIT ' + numberTopProducts,
+                            // function(err, results) {
+                                // if (!err){
 
-                                    kpi6 = results;
+                                    // kpi6 = results;
 
-                                }
-                                else {
-                                    console.log('Error while performing Query KPI 6 (Top 10 Bestseller).', err);
-                                }
-                            }
-                        );
-                    }
+                                // }
+                                // else {
+                                    // console.log('Error while performing Query KPI 6 (Top 10 Bestseller).', err);
+                                // }
+                            // }
+                        // );
+                    // }
                     // Rufe Query mit X Produkten auf, falls auf Webseite Button geändert wurde
-                    else {
-                        kpi6 = undefined;
-                        console.log("______________________: " + numberTopProducts);
-                        connectionCustomerDB.query(
-                            'SELECT vi.item_id, i.description AS Beschreibung, SUM(vi.total_order_qty) AS Anzahl \
-                            FROM    ( \
-                                    SELECT visitor_id as vid \
-                                    FROM tracking_events \
-                                    WHERE event_type = "ORDER_COMPLETE" \
-                                    ) o, visitor_item vi, item i \
-                            WHERE o.vid = vi.visitor_id AND vi.item_id = i.id \
-                            GROUP BY vi.item_id \
-                            ORDER BY SUM(vi.total_order_qty) DESC \
-                            LIMIT ' + numberTopProducts,
-                            function(err, results) {
-                                if (!err){
-                                    kpi6 = results;
-                                    console.log("result9: " + kpi6);
-                                }
-                                else {
-                                    console.log('Error while performing Query KPI 6 (Top X Bestseller).', err);
-                                }
-                            }
-                        );
-                    }
+                    // else {
+                        // kpi6 = undefined;
+                        // console.log("______________________: " + numberTopProducts);
+                        // connectionCustomerDB.query(
+                            // 'SELECT vi.item_id, i.description AS Beschreibung, SUM(vi.total_order_qty) AS Anzahl \
+                            // FROM    ( \
+                                    // SELECT visitor_id as vid \
+                                    // FROM tracking_events \
+                                    // WHERE event_type = "ORDER_COMPLETE" \
+                                    // ) o, visitor_item vi, item i \
+                            // WHERE o.vid = vi.visitor_id AND vi.item_id = i.id \
+                            // GROUP BY vi.item_id \
+                            // ORDER BY SUM(vi.total_order_qty) DESC \
+                            // LIMIT ' + numberTopProducts,
+                            // function(err, results) {
+                                // if (!err){
+                                    // kpi6 = results;
+                                    // console.log("result9: " + kpi6);
+                                // }
+                                // else {
+                                    // console.log('Error while performing Query KPI 6 (Top X Bestseller).', err);
+                                // }
+                            // }
+                        // );
+                    // }
 
 
                     // KPI 7_1: Durchschnittliche Zeit auf Seite
                     // RETURN: Wert als Zahl
-        			connectionCustomerDB.query(
-                        'SELECT ROUND(AVG(JSON_EXTRACT(event_data,"$.active_page_view_time")), 1) AS average_page_view_time \
-                        FROM tracking_events \
-                        WHERE event_type = "PAGEVIEW_COMPLETE"',
-        				function(err, results) {
-                            if (!err){
-                                kpi7_1 = JSON.stringify(results[0].average_page_view_time);
-                                console.log("ZEIT: " + kpi7_1);
-                            }
-                            else{
-                                console.log('Error while performing Query KPI 7_1 (Durchschnittliche Zeit auf Seite).');
-                            }
-                        }
-                    );
+        			// connectionCustomerDB.query(
+                        // 'SELECT ROUND(AVG(JSON_EXTRACT(event_data,"$.active_page_view_time")), 1) AS average_page_view_time \
+                        // FROM tracking_events \
+                        // WHERE event_type = "PAGEVIEW_COMPLETE"',
+        				// function(err, results) {
+                            // if (!err){
+                                // kpi7_1 = JSON.stringify(results[0].average_page_view_time);
+                                // console.log("ZEIT: " + kpi7_1);
+                            // }
+                            // else{
+                                // console.log('Error while performing Query KPI 7_1 (Durchschnittliche Zeit auf Seite).');
+                            // }
+                        // }
+                    // );
 
                     // KPI 7_2: Durchschnittliche Zeit bis zum Kauf #SCHWELLWERT: unter 4 Stunden
                     // RETURN: Wert als Zahl
-                    connectionCustomerDB.query(
-                        'SELECT ROUND((AVG(max.ende - min.anfang) / 60), 0) AS durchschnittliche_zeit_bis_kauf \
-                    	FROM ( \
-                            SELECT session_id, MIN(creation_timestamp) AS anfang \
-                    	    FROM tracking_events \
-                    	    GROUP BY session_id \
-                             ) min, \
-                    		( \
-                            SELECT session_id, MAX(creation_timestamp) AS ende \
-                    		FROM tracking_events \
-                    		WHERE event_type = "ORDER_COMPLETE" \
-                    		GROUP BY session_id \
-                            ) max \
-                    	WHERE min.session_id = max.session_id AND (max.ende - min.anfang) < 14400',
-        				function(err, results) {
-                            if (!err){
-                                kpi7_2 = JSON.stringify(results[0].durchschnittliche_zeit_bis_kauf);
-                            }
-                            else{
-                                console.log('Error while performing Query KPI 7_2 (Durchschnittliche Zeit bis zum Kauf).');
-                            }
-                        }
-                    );
+                    // connectionCustomerDB.query(
+                        // 'SELECT ROUND((AVG(max.ende - min.anfang) / 60), 0) AS durchschnittliche_zeit_bis_kauf \
+                    	// FROM ( \
+                            // SELECT session_id, MIN(creation_timestamp) AS anfang \
+                    	    // FROM tracking_events \
+                    	    // GROUP BY session_id \
+                             // ) min, \
+                    		// ( \
+                            // SELECT session_id, MAX(creation_timestamp) AS ende \
+                    		// FROM tracking_events \
+                    		// WHERE event_type = "ORDER_COMPLETE" \
+                    		// GROUP BY session_id \
+                            // ) max \
+                    	// WHERE min.session_id = max.session_id AND (max.ende - min.anfang) < 14400',
+        				// function(err, results) {
+                            // if (!err){
+                                // kpi7_2 = JSON.stringify(results[0].durchschnittliche_zeit_bis_kauf);
+                            // }
+                            // else{
+                                // console.log('Error while performing Query KPI 7_2 (Durchschnittliche Zeit bis zum Kauf).');
+                            // }
+                        // }
+                    // );
 
                     // KPI 7_3: Anteil Besucher, die Zeittracking erlauben
                     // RETURN: Wert als Zahl in Prozent (ohne Prozentzeichen), zb. 49
-        			connectionCustomerDB.query(
-                        'SELECT ROUND((pageview_complete_events.pageview_sessions / all_tracking_events.all_sessions * 100), 1) AS ratio_js_users \
-                    	FROM \
-                    		( \
-                    		SELECT COUNT(DISTINCT(session_id)) AS pageview_sessions \
-                    		FROM tracking_events \
-                    		WHERE event_type = "PAGEVIEW_COMPLETE" \
-                            ) pageview_complete_events, \
-                    		( \
-                    		SELECT COUNT(DISTINCT(session_id)) AS all_sessions \
-                    		FROM tracking_events \
-                            ) all_tracking_events',
-                            function(err, results) {
-                                if (!err){
-                                    kpi7_3 = JSON.stringify(results[0].ratio_js_users);
-                                    console.log("ZEIT: " + kpi7_3);
-                                }
-                                else{
-                                    console.log('Error while performing Query KPI 7_3 (Anteil TrackingUser).');
-                                }
-                            }
-                    );
+        			// connectionCustomerDB.query(
+                        // 'SELECT ROUND((pageview_complete_events.pageview_sessions / all_tracking_events.all_sessions * 100), 1) AS ratio_js_users \
+                    	// FROM \
+                    		// ( \
+                    		// SELECT COUNT(DISTINCT(session_id)) AS pageview_sessions \
+                    		// FROM tracking_events \
+                    		// WHERE event_type = "PAGEVIEW_COMPLETE" \
+                            // ) pageview_complete_events, \
+                    		// ( \
+                    		// SELECT COUNT(DISTINCT(session_id)) AS all_sessions \
+                    		// FROM tracking_events \
+                            // ) all_tracking_events',
+                            // function(err, results) {
+                                // if (!err){
+                                    // kpi7_3 = JSON.stringify(results[0].ratio_js_users);
+                                    // console.log("ZEIT: " + kpi7_3);
+                                // }
+                                // else{
+                                    // console.log('Error while performing Query KPI 7_3 (Anteil TrackingUser).');
+                                // }
+                            // }
+                    // );
 
 
 
@@ -496,30 +493,75 @@ module.exports = function(app, passport, connectionLoginDB) {
                         //     );
                         // }
 
-
-                    while (years === undefined || kpi1_1 === undefined || kpi1_2 === undefined || kpi3 === undefined || kpi4 === undefined || kpi5_1 === undefined || kpi5_2 === undefined || kpi5_3 === undefined || kpi6 === undefined || kpi7_1 === undefined || kpi7_2 === undefined || kpi7_3 === undefined || numberTopProducts === undefined) {
+					//numberTopProducts entfernen
+					while (years === undefined
+					|| kpi1_1 === undefined
+					|| kpi1_2 === undefined
+					|| numberTopProducts === undefined) {
                     	deasync.runLoopOnce();
                     }
 
 
-            		res.render('profile.ejs', {
-                        user                : req.user.username,
-                        years_kpi1          : years,
-                        result4_1           : kpi1_1,
-                        result4_2           : kpi1_2,
-                        result5             : kpi2,
-                        result6             : kpi3,
-                        result7             : kpi4,
-                        result8_1           : kpi5_1,
-                        result8_2           : kpi5_2,
-                        result8_3           : kpi5_3,
-                        result9             : kpi6,
-                        result10_1          : kpi7_1,
-                        result10_2          : kpi7_2,
-                        result10_3          : kpi7_3,
-                        numberTopProducts   : numberTopProducts,
-                        year                : selectedYear
-                    });
+					connectionLoginDB.query('SELECT kpi4, kpi5_1, kpi5_2, kpi5_3, kpi6, kpi7_1, kpi7_2, kpi7_3 \
+						FROM users WHERE username ="'+req.user.username+'"', function(err, results){
+							if(!err){
+								kpi4=JSON.parse(results[0].kpi4);
+								kpi5_1=JSON.parse(results[0].kpi5_1);
+								kpi5_2=JSON.parse(results[0].kpi5_2);
+								kpi5_3=JSON.parse(results[0].kpi5_3);
+							    kpi6=JSON.parse(results[0].kpi6);
+								kpi7_1=JSON.parse(results[0].kpi7_1);
+								kpi7_2=JSON.parse(results[0].kpi7_2);
+								kpi7_3=JSON.parse(results[0].kpi7_3);
+
+                                var kpi6_parametrisiert=[];
+                                for (var i = 0; i < numberTopProducts; i++) {
+                                    kpi6_parametrisiert.push(kpi6[i]);
+                                    console.log(kpi6_parametrisiert.length);
+                                }
+
+								res.render('profile.ejs', {
+									user                : req.user.username,
+									years_kpi1          : years,
+									result4_1           : kpi1_1,
+									result4_2           : kpi1_2,
+									result5             : kpi2,
+									result6             : kpi3,
+									result7             : kpi4,
+									result8_1           : kpi5_1,
+									result8_2           : kpi5_2,
+									result8_3           : kpi5_3,
+									result9             : kpi6_parametrisiert,
+									result10_1          : kpi7_1,
+									result10_2          : kpi7_2,
+									result10_3          : kpi7_3,
+									numberTopProducts   : numberTopProducts,
+									year                : selectedYear
+								});
+							}
+
+						});
+
+
+
+            		// res.render('profile.ejs', {
+                        // user                : req.user.username,
+                        // years_kpi1          : years,
+                        // result4_1           : kpi1_1,
+                        // result4_2           : kpi1_2,
+                        // result5             : kpi2,
+                        // result6             : kpi3,
+                        // result7             : kpi4,
+                        // result8_1           : kpi5_1,
+                        // result8_2           : kpi5_2,
+                        // result8_3           : kpi5_3,
+                        // result9             : kpi6,
+                        // result10_1          : kpi7_1,
+                        // result10_2          : kpi7_2,
+                        // result10_3          : kpi7_3,
+                        // numberTopProducts   : numberTopProducts,
+                        // year                : selectedYear
+                    // });
 
                 });
         }
