@@ -121,7 +121,7 @@
             ******************* -->
             <div class="row">
                 <!-- Linkes Feld in Reihe 0 (Umsatz) -->
-                <div class="col-xs-8">
+                <div class="col-xs-12">
                     <div class="well">
                         <h3 class="text-center">Gesamtumsatz im Jahr &nbsp;
                                 <!-- Auswahl-Button für parametrisierbares Jahr von KPI1 (UmsatzProMonat) -->
@@ -148,26 +148,47 @@
                     </div>
                 </div>
 
-                <!-- Rechtes Feld in Reihe 0 (Warenkörbe) -->
-                <div class="col-xs-4">
-                    <div class="well">
-                        <!-- KPI 5: Warenkorb- und Bestell-Daten und -->
-                        <!-- ************** TO-DO: Info-Button hinzufügen, wo man die Erklärung für die Werte erhält ********** -->
-                        <p class="text-left">Durchschnittlicher Warenkorbwert: <strong><%-JSON.stringify(result8_1[0].avg_wk)%>€</strong></p>
-                        <p class="text-left">Durchschnittliche Bestellsumme: <strong><%-JSON.stringify(result8_3[0].Bestellsumme_AVG)%>€</strong></p>
-                		<p class="text-left">Rate nicht-bestellter Warenkörbe: <strong><%-JSON.stringify(result8_2[0].rate_n_wk)%>%</strong></p>
-                    </div>
-                </div>
+                
 
             </div>
-
-            <!-- *****************
+			<!-- *****************
             **********************
             REIHE 1
             **********************
             ******************* -->
             <div class="row">
-                <!-- Linkes Feld in Reihe 1 -->
+			<!-- Linkes Feld in Reihe 1 -->
+                <div class="col-xs-6">
+                    <div class="well">
+                        
+                        <!-- KPI 5: Warenkörbe-Daten -->
+                        <!-- ************** TO-DO: Info-Button hinzufügen, wo man die Erklärung für die Werte erhält ********** -->
+                        <p class="text-left">Durchschnittliche Zeit auf Seite: <strong><%-JSON.stringify(result10_1[0].average_page_view_time)%> Sekunden</strong></p>
+                        <p class="text-left">Durchschnittliche Zeit bis zum Kauf: ca. <strong><%-JSON.stringify(result10_2[0].durchschnittliche_zeit_bis_kauf)%> Minuten</strong></p>
+                        <p class="text-left" style="text; color: #afafaf;"><small>Basierend auf Werten von <%-JSON.stringify(result10_3[0].ratio_js_users)%>% der Besucher (Restliche erlauben kein Tracking)</small></p>
+
+                        
+                    </div>
+                </div>
+			<!-- Rechtes Feld in Reihe 1 (Warenkörbe) -->
+                <div class="col-xs-6">
+                    <div class="well">
+                        <!-- KPI 5: Warenkorb- und Bestell-Daten und -->
+                        <!-- ************** TO-DO: Info-Button hinzufügen, wo man die Erklärung für die Werte erhält ********** --> 
+						<p class="text-left">Durchschnittliche Bestellsumme: <strong><%-JSON.stringify(result8_3[0].Bestellsumme_AVG)%>€</strong></p>
+                        <p class="text-left">Durchschnittlicher Warenkorbwert: <strong><%-JSON.stringify(result8_1[0].avg_wk)%>€</strong></p>                       
+                		<p class="text-left">Rate nicht-bestellter Warenkörbe: <strong><%-JSON.stringify(result8_2[0].rate_n_wk)%>%</strong></p>
+                    </div>
+                </div>
+			</div>
+
+            <!-- *****************
+            **********************
+            REIHE 2
+            **********************
+            ******************* -->
+            <div class="row">
+                <!-- Linkes Feld in Reihe 2 -->
                 <div class="col-lg-6">
                     <div class="well">
 
@@ -192,7 +213,7 @@
                                 //
                                 // KPI-Diagramm Umsatz pro Monat
                                 //
-                                var svg4 = dimple.newSvg("#chart_kpi1", "100%", 250);
+                                var svg4 = dimple.newSvg("#chart_kpi1", "100%", 350);
                                 var data4 = <%-JSON.stringify(result4_2)%>;
                                 var chart4 = new dimple.chart(svg4, data4);
                                 var x4 = chart4.addCategoryAxis("x", "monat");
@@ -207,7 +228,7 @@
 
                     </div>
                 </div>
-                <!-- Rechtes Feld in Reihe 1 -->
+                <!-- Rechtes Feld in Reihe 2 -->
                 <div class="col-lg-6">
                     <div class="well">
                         <!-- Button um Diagramm von KPI 4 ein- & auszublenden -->
@@ -221,7 +242,7 @@
                                 //
                                 // KPI-Diagramm Umsatz über Stunde
                                 //
-                        		var svg7 = dimple.newSvg("#chart_kpi4", "100%", 250);
+                        		var svg7 = dimple.newSvg("#chart_kpi4", "100%", 350);
                         		var data7 = <%-JSON.stringify(result7)%>
                         		var chart7 = new dimple.chart(svg7, data7);
                         		var x7 = chart7.addCategoryAxis("x", "stunde");
@@ -239,11 +260,11 @@
 
             <!-- *****************
             **********************
-            REIHE 2
+            REIHE 3
             **********************
             ******************* -->
             <div class="row">
-                <!-- Linkes Feld in Reihe 2 -->
+                <!-- Linkes Feld in Reihe 3 -->
                 <div class="col-lg-6">
                     <div class="well">
                         <!-- Button um Diagramm von KPI 6 ein- & auszublenden -->
@@ -315,12 +336,21 @@
                         </div>
                     </div>
                 </div>
-                <!-- Rechtes Feld in Reihe 2 -->
+                <!-- Rechtes Feld in Reihe 3 -->
                 <div class="col-lg-6">
                     <div class="well">
                         <!-- Button um Diagramm von KPI 3 ein- & auszublenden -->
-                        <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi3" data-toggle="collapse" type="button">Conversionrate (absolut) anzeigen</button>
-                        <!-- Diagramm KPI 3 -->
+                        <div class="col-xs-6">
+							<button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi3" data-toggle="collapse" type="button">Conversion Rate<br>(monatlich) anzeigen</button>
+							
+						</div>
+						<div class="col-xs-6">
+							<p class="text-left"><br>Conversion Rate (total): <strong><%-JSON.stringify(result6_1[0].conversion_rate)%> %</strong></p>
+						</div>
+						<br>
+						<br>
+						<br>
+						<!-- Diagramm KPI 3 -->
                         <div id="chart_kpi3" class="collapse in" aria-expanded="false">
                             <!--***********************
                             Hier kommt das Diagramm für KPI 3 (Conversionrate in absoluten Zahlen pro Monat) hin
@@ -329,7 +359,7 @@
                                 //
                                 // KPI-Diagramm Conversionrate in absoluten Zahlen pro Monat
                                 //
-                                var svg6 = dimple.newSvg("#chart_kpi3", "100%", 250);
+                                var svg6 = dimple.newSvg("#chart_kpi3", "100%", 350);
                                 // so sieht die Übergabe der DB aus:
                                 //      var result = [
                                 //	     	{"monat": "1", "anzahl_orders": "123", "anzahl_visitor": "200"},
@@ -377,25 +407,7 @@
                 <div class="col-lg-6">
 
                 </div>
-                <!-- Rechtes Feld in Reihe 3 -->
-                <div class="col-lg-6">
-                    <div class="well">
-                        <!-- Button um Diagramm von KPI 7 ein- & auszublenden -->
-                        <button aria-expanded="false" class="btn btn-primary" data-target="#chart_kpi4" data-toggle="collapse" type="button">XXXXXXXX anzeigen</button>
-                        <!-- KPI 5: Warenkörbe-Daten -->
-                        <!-- ************** TO-DO: Info-Button hinzufügen, wo man die Erklärung für die Werte erhält ********** -->
-                        <p class="text-left">Durchschnittliche Zeit auf Seite: <strong><%-JSON.stringify(result10_1[0].average_page_view_time)%> Sekunden</strong></p>
-                        <p class="text-left">Durchschnittliche Zeit bis zum Kauf: ca. <strong><%-JSON.stringify(result10_2[0].durchschnittliche_zeit_bis_kauf)%> Minuten</strong></p>
-                        <p class="text-left" style="text; color: #afafaf;"><small>Basierend auf Werten von <%-JSON.stringify(result10_3[0].ratio_js_users)%>% der Besucher (Restliche erlauben kein Tracking)</small></p>
-
-                        <script>
-                            //
-                            // KPI-Diagramm X
-                            //
-
-                        </script>
-                    </div>
-                </div>
+                
             </div>
 
         </div>
