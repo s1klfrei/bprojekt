@@ -17,7 +17,7 @@ var session      = require('express-session');
 var connectionLoginDB = require('./config/database.js');
 
 
-// Datenbank-Konfiguration ===============================================================
+// Datenbank-Konfiguration =====================================================
 // DB-Verbindung aufbauen
 connectionLoginDB.connect(function(err) {
   if (err) throw err;
@@ -47,18 +47,20 @@ app.set('view engine', 'ejs'); // set up ejs for templating
 
 // required for passport
 app.use(session({
-  secret: 'ilovedynamiccommerce', // encryption
+  secret: 'ilovedynamiccommerce',   // encryption
   resave: true, 					// These two that no warnings appear
-  saveUninitialized: true //
+  saveUninitialized: true           //
 }));
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
 
-// routes ======================================================================
-//require('./sql_queries/kpi_queries.js')(connectionLoginDB);
+// routes
 require('./app/routes.js')(app, passport, connectionLoginDB); // load our routes and pass in our app and fully configured passport
 
-// launch ======================================================================
+// get latest KPI-results and save in Database
+require('./sql_queries/kpi_queries.js')(connectionLoginDB);
+
+// launch
 app.listen(port);
 console.log('The magic happens on port ' + port);

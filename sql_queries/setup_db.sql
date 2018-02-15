@@ -1,8 +1,8 @@
 DROP TABLE users;
 
-create table users (id int NOT NULL AUTO_INCREMENT, username VARCHAR(20), password VARCHAR(255), host VARCHAR(20), username_db VARCHAR(20), password_db VARCHAR(20), db VARCHAR(20), kpi3 json, kpi4 json, kpi5_1 json, kpi5_2 json, kpi5_3 json, kpi6 json, kpi7_1 json, kpi7_2 json, kpi7_3 json, PRIMARY KEY (id));
+create table users (id int NOT NULL AUTO_INCREMENT, username VARCHAR(20), password VARCHAR(255), host VARCHAR(20), username_db VARCHAR(20), password_db VARCHAR(20), db VARCHAR(20), years json, kpi1_1 json, kpi1_2 json, kpi3 json, kpi3_1 json, kpi4 json, kpi5_1 json, kpi5_2 json, kpi5_3 json, kpi6 json, kpi7_1 json, kpi7_2 json, kpi7_3 json, PRIMARY KEY (id));
 
-
+#TESTUSERS
 INSERT INTO `login`.`users`
 (`username`,
 `password`)

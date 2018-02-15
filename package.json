@@ -2,6 +2,7 @@
   "name": "bi_app_dynamic_commerce",
   "main": "server.js",
   "dependencies": {
+    "async": "^2.6.0",
     "bcrypt-nodejs": "latest",
     "body-parser": "~1.15.2",
     "connect-flash": "~0.1.1",
